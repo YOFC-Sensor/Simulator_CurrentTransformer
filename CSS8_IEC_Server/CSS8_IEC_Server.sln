@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31129.286
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSS8_IEC_Server", "CSS8_IEC_Server\CSS8_IEC_Server.csproj", "{40224EB4-4314-4514-BD9B-660ECDC54B7A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{42B7E260-B917-4E78-B7F4-CA0DF2C9A25E} = {42B7E260-B917-4E78-B7F4-CA0DF2C9A25E}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpSend", "..\HttpSend\HttpSend\HttpSend.csproj", "{42B7E260-B917-4E78-B7F4-CA0DF2C9A25E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{40224EB4-4314-4514-BD9B-660ECDC54B7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{40224EB4-4314-4514-BD9B-660ECDC54B7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{40224EB4-4314-4514-BD9B-660ECDC54B7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{40224EB4-4314-4514-BD9B-660ECDC54B7A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{42B7E260-B917-4E78-B7F4-CA0DF2C9A25E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42B7E260-B917-4E78-B7F4-CA0DF2C9A25E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42B7E260-B917-4E78-B7F4-CA0DF2C9A25E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42B7E260-B917-4E78-B7F4-CA0DF2C9A25E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8885A911-BBB6-47C6-9BDA-DA68BB320430}
+	EndGlobalSection
+EndGlobal

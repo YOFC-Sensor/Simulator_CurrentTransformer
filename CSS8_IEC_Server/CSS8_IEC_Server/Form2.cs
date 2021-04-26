@@ -17,6 +17,8 @@ namespace CSS8_IEC_Server
             Number_TextBox.Text = _macInfo.number.ToString();
             //修改完成按钮点击函数
             Edit_MAC_OK_Button.Click += Edit_MAC_OK_Button_Click;
+            //取消按钮点击事件
+            Edit_MAC_Cancle_Button.Click += Edit_MAC_Cancle_Button_Click;
         }
 
         public void Edit_MAC_OK_Button_Click(object sender, EventArgs e)
@@ -34,6 +36,11 @@ namespace CSS8_IEC_Server
             }
             Form1._macInfo = macInfo;
             _macInfo = null;
+            Close();
+        }
+
+        public void Edit_MAC_Cancle_Button_Click(object sender, EventArgs e)
+        {
             Close();
         }
     }

@@ -18,7 +18,7 @@ namespace CSS8_IEC_Client
         public static bool isConnectCOmplete = false;
         public Client_Form()
         {
-            string xmlPath = @"D:\VS\CSS8_IEC_Client\CSS8_IEC_Client\MacInfo.xml";
+            string xmlPath = System.IO.Directory.GetCurrentDirectory() + @"\MacInfos.xml";
             serverPoint = Utils.XmlToServerPoint(xmlPath);
             macInfos = Utils.XmlToMacInfos(xmlPath);
             InitializeComponent();

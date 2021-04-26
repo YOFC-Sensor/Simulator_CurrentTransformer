@@ -90,7 +90,6 @@ namespace CSS8_IEC_Server
         private System.Windows.Forms.TextBox Number_TextBox;
         private System.Windows.Forms.Label Number_Label;
         private System.Windows.Forms.Button Edit_MAC_OK_Button;
-        private System.Windows.Forms.Button Edit_Number_Cancle_Button;
         private System.Windows.Forms.Button Edit_MAC_Cancle_Button;
     }
 }

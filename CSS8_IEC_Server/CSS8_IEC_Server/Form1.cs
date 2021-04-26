@@ -5,7 +5,6 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Windows.Forms;
-using HttpSend;
 
 namespace CSS8_IEC_Server
 {
@@ -19,11 +18,10 @@ namespace CSS8_IEC_Server
         public static int _index = -1;
         public static Mac_Info _macInfo  = null;
         public static bool isUserDisConnect = false;
-        public static List<string[]> totalSensorUrls = new List<string[]>();
+        public static string xmlPath = "";
         public Form1()
         {
-            //获取全部的Url
-            totalSensorUrls = Utils.GetTotalSensorUrls(@"D:\VS\CSS8_IEC_Server\CSS8_IEC_Server\Url.xml");
+            xmlPath = System.IO.Directory.GetCurrentDirectory() + @"\SensorUrls.xml";
             InitializeComponent();
             //开启设备信息实时更新
             Thread t = new Thread(() => EditMacInfo());
@@ -294,6 +292,9 @@ namespace CSS8_IEC_Server
         public static void CycleSendAndRecv(Mac_Info macInfo, Form1 form)
         {
             int index = macInfos.IndexOf(macInfo);
+            //获取全部的Url
+            List<string[]> totalSensorUrls = new List<string[]>();
+            totalSensorUrls = Utils.GetTotalSensorUrls(xmlPath);
             while (macInfo.isCycleSend)
             {
                 Utils.Delay(1000);

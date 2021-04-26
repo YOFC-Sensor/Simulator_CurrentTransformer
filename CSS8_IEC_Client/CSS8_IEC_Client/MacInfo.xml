@@ -1,5 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<Client serverIPAddr="192.168.0.103" serverPort="60000">
-	<Mac name="MAC1" number="FFFF" data="12131314141515161213131414151516" />
-	<Mac name="MAC2" number="FFFE" data="12131314141515161213131414151516" />
-</Client>

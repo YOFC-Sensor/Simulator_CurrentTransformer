@@ -10,10 +10,4 @@
     <ProjectReference Include="..\..\HttpSend\HttpSend\HttpSend.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>bin\Debug\netcoreapp3.1\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
 </Project>

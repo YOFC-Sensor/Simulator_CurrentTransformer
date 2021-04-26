@@ -41,11 +41,11 @@ namespace CSS8_IEC_Server
             this.Start_Server_Button = new System.Windows.Forms.Button();
             this.Get_Data_Button = new System.Windows.Forms.Button();
             this.Server_IP_Label = new System.Windows.Forms.Label();
-            this.Server_IP_TextBox = new System.Windows.Forms.TextBox();
             this.Server_Port_Label = new System.Windows.Forms.Label();
-            this.Server_Port_Text = new System.Windows.Forms.TextBox();
             this.Server_State = new System.Windows.Forms.Label();
             this.MAC_State = new System.Windows.Forms.Label();
+            this.Server_IP_TextBox = new System.Windows.Forms.TextBox();
+            this.Server_Port_Text = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // Recv_Data_Label
@@ -153,13 +153,6 @@ namespace CSS8_IEC_Server
             this.Server_IP_Label.TabIndex = 20;
             this.Server_IP_Label.Text = "IP：";
             // 
-            // Server_IP_TextBox
-            // 
-            this.Server_IP_TextBox.Location = new System.Drawing.Point(367, 415);
-            this.Server_IP_TextBox.Name = "Server_IP_TextBox";
-            this.Server_IP_TextBox.Size = new System.Drawing.Size(109, 23);
-            this.Server_IP_TextBox.TabIndex = 21;
-            // 
             // Server_Port_Label
             // 
             this.Server_Port_Label.AutoSize = true;
@@ -168,13 +161,6 @@ namespace CSS8_IEC_Server
             this.Server_Port_Label.Size = new System.Drawing.Size(56, 17);
             this.Server_Port_Label.TabIndex = 22;
             this.Server_Port_Label.Text = "端口号：";
-            // 
-            // Server_Port_Text
-            // 
-            this.Server_Port_Text.Location = new System.Drawing.Point(559, 415);
-            this.Server_Port_Text.Name = "Server_Port_Text";
-            this.Server_Port_Text.Size = new System.Drawing.Size(73, 23);
-            this.Server_Port_Text.TabIndex = 23;
             // 
             // Server_State
             // 
@@ -193,16 +179,30 @@ namespace CSS8_IEC_Server
             this.MAC_State.Size = new System.Drawing.Size(0, 17);
             this.MAC_State.TabIndex = 25;
             // 
+            // Server_IP_TextBox
+            // 
+            this.Server_IP_TextBox.Location = new System.Drawing.Point(370, 415);
+            this.Server_IP_TextBox.Name = "Server_IP_TextBox";
+            this.Server_IP_TextBox.Size = new System.Drawing.Size(100, 23);
+            this.Server_IP_TextBox.TabIndex = 26;
+            // 
+            // Server_Port_Text
+            // 
+            this.Server_Port_Text.Location = new System.Drawing.Point(563, 415);
+            this.Server_Port_Text.Name = "Server_Port_Text";
+            this.Server_Port_Text.Size = new System.Drawing.Size(100, 23);
+            this.Server_Port_Text.TabIndex = 27;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.Server_Port_Text);
+            this.Controls.Add(this.Server_IP_TextBox);
             this.Controls.Add(this.MAC_State);
             this.Controls.Add(this.Server_State);
-            this.Controls.Add(this.Server_Port_Text);
             this.Controls.Add(this.Server_Port_Label);
-            this.Controls.Add(this.Server_IP_TextBox);
             this.Controls.Add(this.Server_IP_Label);
             this.Controls.Add(this.Get_Data_Button);
             this.Controls.Add(this.Start_Server_Button);
@@ -232,11 +232,11 @@ namespace CSS8_IEC_Server
         private System.Windows.Forms.Button Start_Server_Button;
         private System.Windows.Forms.Button Get_Data_Button;
         private System.Windows.Forms.Label Server_IP_Label;
-        private System.Windows.Forms.TextBox Server_IP_TextBox;
         private System.Windows.Forms.Label Server_Port_Label;
-        private System.Windows.Forms.TextBox Server_Port_Text;
         private System.Windows.Forms.Label Server_State;
         private System.Windows.Forms.Label MAC_State;
+        private System.Windows.Forms.TextBox Server_IP_TextBox;
+        private System.Windows.Forms.TextBox Server_Port_Text;
     }
 }
 

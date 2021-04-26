@@ -8,7 +8,7 @@ namespace HttpSend
 {
     public class HTTPTransmit
     {
-        public static void Send(string url, object data)
+        public static string Send(string url, object data)
         {
             string jsonStr = JsonConvert.SerializeObject(data);
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
@@ -23,11 +23,19 @@ namespace HttpSend
             }
             catch (Exception)
             {
-                return;
+                return "fail";
             }
             writer.Write(payload, 0, payload.Length);
-            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+            try
+            {
+                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+            }
+            catch (Exception)
+            {
+                return "fail";
+            }
             writer.Close();
+            return "success";
         }
     }
 }

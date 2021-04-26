@@ -18,10 +18,10 @@ namespace CSS8_IEC_Server
         public static int _index = -1;
         public static Mac_Info _macInfo  = null;
         public static bool isUserDisConnect = false;
-        public static string xmlPath = "";
+        public static string xmlPath = @".\SensorUrls.xml";
+        public static List<string[]> totalSensorUrls = new List<string[]>();
         public Form1()
         {
-            xmlPath = System.IO.Directory.GetCurrentDirectory() + @"\SensorUrls.xml";
             InitializeComponent();
             //开启设备信息实时更新
             Thread t = new Thread(() => EditMacInfo());
@@ -46,6 +46,8 @@ namespace CSS8_IEC_Server
         {
             if (Server_State.Text == "服务器未开启")
             {
+                //获取全部的Url
+                totalSensorUrls = Utils.GetTotalSensorUrls(xmlPath);
                 StartServer();
             }
             else
@@ -112,7 +114,7 @@ namespace CSS8_IEC_Server
             isUserDisConnect = true;
             //关闭设备的套接字
             macInfos[index].socket.Disconnect(true);
-            Utils.Delay(100);
+            Utils.Delay(1000);
             macInfos[index].socket.Close();
             RemoveMac(macInfos[index]);
         }
@@ -139,6 +141,7 @@ namespace CSS8_IEC_Server
             catch(Exception e)
             {
                 MessageBox.Show("IP地址格式不正确：" + e.Message);
+                return;
             }
             int port = 0;
             try
@@ -148,6 +151,7 @@ namespace CSS8_IEC_Server
             catch (Exception e)
             {
                 MessageBox.Show("端口号格式不正确：" + e.Message);
+                return;
             }
             IPEndPoint serverPoint = new IPEndPoint(ipAddress, port);
             serverSocket.Bind(serverPoint);
@@ -161,23 +165,14 @@ namespace CSS8_IEC_Server
 
         public void CloseServer()
         {
-            foreach (ListViewItem item in Mac_ListView.Items)
-            {
-                if (item.SubItems[3].Text == "已启用")
-                {
-                    MessageBox.Show("请先停止所有设备！");
-                    return;
-                }
-            }
             serverSocket.Close();
             isUserDisConnect = true;
             for (int i = macInfos.Count - 1; i >= 0; i--)
             {
                 int temp = macCount;
                 Mac_Info macInfo = macInfos[i];
-                macInfo.socket.Disconnect(true);
                 macInfo.socket.Close();
-                Utils.Delay(100);
+                RemoveMac(macInfo);
             }
             Server_IP_TextBox.ReadOnly = false;
             Server_Port_Text.ReadOnly = false;
@@ -238,6 +233,7 @@ namespace CSS8_IEC_Server
         {
             int index = macInfos.IndexOf(macInfo);
             //删除内存中的设备
+            macInfo.isCycleSend = false;
             macInfos.Remove(macInfo);
             //删除ListView中的设备s
             Mac_ListView.EndInvoke(Mac_ListView.BeginInvoke(new Action(() => {
@@ -272,31 +268,32 @@ namespace CSS8_IEC_Server
 
         public void EditMacInfo()
         {
-            while (_macInfo != null)
+            while (true)
             {
-                int index = 0;
-                Mac_ListView.EndInvoke(Mac_ListView.BeginInvoke(new Action(() => {
-                    index = Mac_ListView.SelectedItems[0].Index;
-                })));
-                macInfos[index] = _macInfo;
-                Mac_ListView.EndInvoke(Mac_ListView.BeginInvoke(new Action(() => {
-                    Mac_ListView.SelectedItems[0].SubItems[2].Text = _macInfo.number.ToString();
-                })));
-                _macInfo = null;
+                if (_macInfo != null)
+                {
+                    int index = 0;
+                    Mac_ListView.EndInvoke(Mac_ListView.BeginInvoke(new Action(() => {
+                        index = Mac_ListView.SelectedItems[0].Index;
+                    })));
+                    macInfos[index] = _macInfo;
+                    Mac_ListView.EndInvoke(Mac_ListView.BeginInvoke(new Action(() => {
+                        Mac_ListView.SelectedItems[0].SubItems[2].Text = _macInfo.number.ToString();
+                    })));
+                    _macInfo = null;
+                }
             }
         }
 
         /*
-         * 用于多线程的函数(静态函数，线程安全)
+         * 用于多线程的函数(静态函数，线程安全，但占用资源较多)
          */
         public static void CycleSendAndRecv(Mac_Info macInfo, Form1 form)
         {
             int index = macInfos.IndexOf(macInfo);
-            //获取全部的Url
-            List<string[]> totalSensorUrls = new List<string[]>();
-            totalSensorUrls = Utils.GetTotalSensorUrls(xmlPath);
             while (macInfo.isCycleSend)
             {
+                macInfo.isRecvComplete = false;
                 Utils.Delay(1000);
                 //发送总召唤帧
                 macInfo.socket.Send(Utils.CombineMasterCallFrame(macInfo));
@@ -335,15 +332,15 @@ namespace CSS8_IEC_Server
                 //获取遥测帧中的传感数据并发送给http服务器
                 Utils.AnalysisFrameToHttpServer(realData, totalSensorUrls[index]);
                 //更新FCB
-                if (macInfos[index].isChangeFCB)
+                if (macInfo.isChangeFCB)
                 {
-                    if (macInfos[index].FCB == 0)
+                    if (macInfo.FCB == 0)
                     {
-                        macInfos[index].FCB = 1;
+                        macInfo.FCB = 1;
                     }
                     else
                     {
-                        macInfos[index].FCB = 0;
+                        macInfo.FCB = 0;
                     }
                 }
                 //展示收到的消息
@@ -359,9 +356,9 @@ namespace CSS8_IEC_Server
                 }
                 //将接收到的消息放入内存
                 recvStr += "\r\n";
-                macInfos[index].message += recvStr;
+                macInfo.message += recvStr;
                 form.Recv_TextBox.EndInvoke(form.Recv_TextBox.BeginInvoke(new Action(() => {
-                    form.Recv_TextBox.Text = macInfos[_index].message;
+                    form.Recv_TextBox.Text = macInfo.message;
                 })));
                 macInfo.recvCount += 1;
                 //若接受10次消息则清空内存
@@ -370,6 +367,7 @@ namespace CSS8_IEC_Server
                     macInfo.message = "";
                     macInfo.recvCount = 0;
                 }
+                macInfo.isRecvComplete = true;
             }
         }
 
@@ -384,10 +382,10 @@ namespace CSS8_IEC_Server
                     if (macInfo.socket.Available <= 0)
                     {
                         //关闭设备的套接字
-                        macInfo.socket.Disconnect(true);
+                        macInfo.isCycleSend = false;
                         macInfo.socket.Close();
                         form.RemoveMac(macInfo);
-                        break;
+                        return;
                     }
                 }
                 //接受客户端发送的信息
@@ -402,11 +400,11 @@ namespace CSS8_IEC_Server
                     if (!isUserDisConnect)
                     {
                         //关闭设备的套接字
-                        macInfo.socket.Disconnect(true);
+                        macInfo.isCycleSend = false;
                         macInfo.socket.Close();
                         form.RemoveMac(macInfo);
                     }
-                    break;
+                    return;
                 }
                 byte[] realData = tempBuffer.Skip(0).Take(tempDataLen).ToArray();
                 realData.CopyTo(macInfo.recvBuffer, macInfo.recvDataLen);

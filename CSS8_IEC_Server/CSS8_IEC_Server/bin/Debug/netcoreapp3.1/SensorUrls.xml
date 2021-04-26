@@ -1,15 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Server>
 	<Mac>
-		<Sersor url="http://192.168.0.103:50000" />
-		<Sersor url="http://192.168.0.103:50000" />
-		<Sersor url="http://192.168.0.103:50000" />
-		<Sersor url="http://192.168.0.103:50000" />
+		<Sersor url="http://192.168.8.151:8080/api/v1/7mPRdFU4EuqO0eBU1yac/telemetry" />
+		<Sersor url="http://192.168.8.151:8080/api/v1/BEHvorKf238ZsyCcYgZJ/telemetry" />
+		<Sersor url="http://192.168.8.151:8080/api/v1/I7lB65xwox5CSPtsq2YP/telemetry" />
+		<Sersor url="http://192.168.8.151:8080/api/v1/z5KvaSSbYj34zdQ6Aqv8/telemetry" />
 	</Mac>
 	<Mac>
-		<Sersor url="http://192.168.0.103:50000" />
-		<Sersor url="http://192.168.0.103:50000" />
-		<Sersor url="http://192.168.0.103:50000" />
-		<Sersor url="http://192.168.0.103:50000" />
+		<Sersor url="http://192.168.8.151:8080/api/v1/BzWxsKMcpQaOG6rr2kRW/telemetry" />
+		<Sersor url="http://192.168.8.151:8080/api/v1/JEDOVWiSCn0bDYzvggsV/telemetry" />
+		<Sersor url="http://192.168.8.151:8080/api/v1/eog9s41739R19t6u30ds/telemetry" />
+		<Sersor url="http://192.168.8.151:8080/api/v1/BLsbG1FXiyl5w4Kzdkyl/telemetry" />
 	</Mac>
 </Server>

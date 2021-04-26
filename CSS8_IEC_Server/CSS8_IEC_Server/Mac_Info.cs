@@ -18,5 +18,6 @@ namespace CSS8_IEC_Server
         public string message = "";
         public bool isChangeFCB = false;
         public bool isCycleSend = false;
+        public bool isRecvComplete = false;
     }
 }

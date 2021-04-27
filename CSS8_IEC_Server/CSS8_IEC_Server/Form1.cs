@@ -18,7 +18,7 @@ namespace CSS8_IEC_Server
         public static int _index = -1;
         public static Mac_Info _macInfo  = null;
         public static string xmlPath = @".\SensorUrls.xml";
-        public static List<string[]> totalSensorUrls = new List<string[]>();
+        public static List<List<string>> totalSensorUrls = new List<List<string>>();
         public Form1()
         {
             InitializeComponent();
@@ -305,6 +305,7 @@ namespace CSS8_IEC_Server
             //获取全部的Url
             totalSensorUrls = Utils.GetTotalSensorUrls(xmlPath);
             int index = macInfos.IndexOf(macInfo);
+            List<string> urls = totalSensorUrls[index];
             while (macInfo.isCycleSend)
             {
                 Utils.Delay(1000);
@@ -343,7 +344,7 @@ namespace CSS8_IEC_Server
                 Array.Clear(macInfo.recvBuffer, 0, macInfo.recvBuffer.Length);
                 macInfo.recvDataLen = 0;
                 //获取遥测帧中的传感数据并发送给http服务器
-                Utils.AnalysisFrameToHttpServer(realData, totalSensorUrls[index]);
+                Utils.AnalysisFrameToHttpServer(realData, urls);
                 //更新FCB
                 if (macInfo.isChangeFCB)
                 {

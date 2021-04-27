@@ -150,7 +150,7 @@ namespace CSS8_IEC_Server
             return frame;
         }
 
-        public static void AnalysisFrameToHttpServer(byte[] frames, string[] urls)
+        public static void AnalysisFrameToHttpServer(byte[] frames,List<string> urls)
         {
             //删除帧的第一个元素
             List<byte> tempFrames = frames.ToList();
@@ -190,7 +190,7 @@ namespace CSS8_IEC_Server
             data.RemoveRange(0, 2);
             //将帧中的数据组装成字典
             List<Dictionary<string, double>> totalJsonData = new List<Dictionary<string, double>>();
-            for (int i = 0; i < 8; i = i + 2)
+            for (int i = 0; i < data.Count; i = i + 2)
             {
                 int t = 0;
                 Dictionary<string, double> jsonData = new Dictionary<string, double>();
@@ -201,29 +201,29 @@ namespace CSS8_IEC_Server
                 totalJsonData.Add(jsonData);
             }
             //将每个传感器的数据发送给http服务器
-            for (int i = 0; i < totalJsonData.Count; i++)
+            for (int i = 0; i < urls.Count; i++)
             {
                 Dictionary<string, double> jsonData = totalJsonData[i];
                 HTTPTransmit.Send(urls[i], jsonData);
             }
         }
 
-        public static List<string[]> GetTotalSensorUrls(string xmlPath)
+        public static List<List<string>> GetTotalSensorUrls(string xmlPath)
         {
-            List<string[]> totalUrls = new List<string[]>();
+            List<List<string>> totalUrls = new List<List<string>>();
             XmlDocument xmlDoc = new XmlDocument();
             xmlDoc.Load(xmlPath);
             XmlNode xmlServer = xmlDoc.SelectSingleNode("Server");
             XmlNodeList xmlMacs = xmlServer.SelectNodes("Mac");
             foreach (XmlNode xmlMac in xmlMacs)
             {
-                string[] sensorUrls = new string[4];
+                List<string> sensorUrls = new List<string>();
                 XmlNodeList xmlSensors = xmlMac.SelectNodes("Sersor");
-                for (int i = 0; i < 4; i++)
+                foreach (XmlNode xmlSensor in xmlSensors)
                 {
-                    XmlElement xe = (XmlElement)xmlSensors[i];
+                    XmlElement xe = (XmlElement)xmlSensor;
                     string url = xe.GetAttribute("url");
-                    sensorUrls[i] = url;
+                    sensorUrls.Add(url);
                 }
                 totalUrls.Add(sensorUrls);
             }

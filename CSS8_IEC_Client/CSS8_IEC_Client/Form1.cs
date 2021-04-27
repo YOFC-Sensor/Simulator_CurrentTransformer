@@ -16,17 +16,17 @@ namespace CSS8_IEC_Client
         public static List<Mac_Info> macInfos = new List<Mac_Info>();//用户已经添加的设备列表
         public static int _index = -1;//当前所选设备的下标
         public static bool isConnectCOmplete = false;
+        public static string xmlPath = @".\MacInfos.xml";
         public Client_Form()
         {
-            string xmlPath =  @".\MacInfos.xml";
-            serverPoint = Utils.XmlToServerPoint(xmlPath);
-            macInfos = Utils.XmlToMacInfos(xmlPath);
             InitializeComponent();
             //绑定清除接收按钮点击事件
             Clear_Recv_Str_Button.Click += ClearRecvStr;
             //设备列表选择事件
             Mac_ListView.SelectedIndexChanged += PrintMessage;
             //处理XML设备
+            serverPoint = Utils.XmlToServerPoint(xmlPath);
+            macInfos = Utils.XmlToMacInfos(xmlPath);
             AddMacsToListView(macInfos);
             Thread t = new Thread(() => MacsConnectServer(macInfos));
             t.IsBackground = true;

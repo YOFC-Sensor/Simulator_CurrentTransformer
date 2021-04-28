@@ -38,7 +38,7 @@ namespace CSS8_IEC_Client
             this.Recv_Label = new System.Windows.Forms.Label();
             this.Clear_Recv_Str_Button = new System.Windows.Forms.Button();
             this.Refresh_Button = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
+            this.Connect_Button = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // Mac_ListView
@@ -117,21 +117,21 @@ namespace CSS8_IEC_Client
             this.Refresh_Button.Text = "刷新";
             this.Refresh_Button.UseVisualStyleBackColor = true;
             // 
-            // button1
+            // Connect_Button
             // 
-            this.button1.Location = new System.Drawing.Point(331, 12);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(88, 24);
-            this.button1.TabIndex = 8;
-            this.button1.Text = "一键连接";
-            this.button1.UseVisualStyleBackColor = true;
+            this.Connect_Button.Location = new System.Drawing.Point(331, 12);
+            this.Connect_Button.Name = "Connect_Button";
+            this.Connect_Button.Size = new System.Drawing.Size(88, 24);
+            this.Connect_Button.TabIndex = 8;
+            this.Connect_Button.Text = "一键连接";
+            this.Connect_Button.UseVisualStyleBackColor = true;
             // 
             // Client_Form
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(912, 450);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.Connect_Button);
             this.Controls.Add(this.Refresh_Button);
             this.Controls.Add(this.Clear_Recv_Str_Button);
             this.Controls.Add(this.Recv_Label);
@@ -154,7 +154,7 @@ namespace CSS8_IEC_Client
         private System.Windows.Forms.Label Recv_Label;
         private System.Windows.Forms.Button Clear_Recv_Str_Button;
         private System.Windows.Forms.Button Refresh_Button;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button Connect_Button;
     }
 }
 

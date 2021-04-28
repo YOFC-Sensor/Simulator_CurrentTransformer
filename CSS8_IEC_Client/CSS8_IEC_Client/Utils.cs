@@ -9,71 +9,12 @@ namespace CSS8_IEC_Server
 {
     public class Utils
     {
-        public static byte Char2ToByte(char[] data)
+        public static byte[] IntToByte2(int data)
         {
-            int result = 0;
-            for (int i = 0; i < data.Length; i++)
-            {
-                int s = 0;
-                if (data[i] >= '0' && data[i] <= '9')
-                {
-                    s = (data[i] - '0');
-                }
-                else
-                {
-                    if (data[i] == 'a' || data[i] == 'A')
-                    {
-                        s = 10;
-                    }
-                    if (data[i] == 'b' || data[i] == 'B')
-                    {
-                        s = 11;
-                    }
-                    if (data[i] == 'c' || data[i] == 'C')
-                    {
-                        s = 12;
-                    }
-                    if (data[i] == 'd' || data[i] == 'D')
-                    {
-                        s = 13;
-                    }
-                    if (data[i] == 'e' || data[i] == 'E')
-                    {
-                        s = 14;
-                    }
-                    if (data[i] == 'f' || data[i] == 'F')
-                    {
-                        s = 15;
-                    }
-                }
-                result += s * (int)Math.Pow(16, data.Length - i - 1);
-            }
-            return (byte)result;
-        }
-
-        public static byte[] ByteStrToBytes(string data)
-        {
-            List<byte> result = new List<byte>();
-            for (int i = 0; i < data.Length; i = i + 2)
-            {
-                string byteStr = data.Substring(i, 2);
-                byte byteInt = Char2ToByte(byteStr.ToArray());
-                result.Add(byteInt);
-            }
-            return result.ToArray();
-        }
-
-        public static IPEndPoint XmlToServerPoint(string xmlPath)
-        {
-            List<Mac_Info> macInfos = new List<Mac_Info>();
-            XmlDocument xmlDoc = new XmlDocument();
-            xmlDoc.Load(xmlPath);
-            XmlNode xmlClient = xmlDoc.SelectSingleNode("Client");
-            XmlElement xe = (XmlElement)xmlClient;
-            IPAddress ipAddress = IPAddress.Parse(xe.GetAttribute("serverIPAddr"));
-            int port = int.Parse(xe.GetAttribute("serverPort"));
-            IPEndPoint point = new IPEndPoint(ipAddress, port);
-            return point;
+            byte heigh = (byte)(data / 256);
+            byte low = (byte)(data % 256);
+            byte[] result = new byte[] { heigh, low };
+            return result;
         }
 
         public static List<Mac_Info> XmlToMacInfos(string xmlPath)
@@ -81,16 +22,53 @@ namespace CSS8_IEC_Server
             List<Mac_Info> macInfos = new List<Mac_Info>();
             XmlDocument xmlDoc = new XmlDocument();
             xmlDoc.Load(xmlPath);
-            XmlNode xmlClient = xmlDoc.SelectSingleNode("Client");
-            XmlNodeList xmlMacs = xmlClient.SelectNodes("Mac");
-            foreach (XmlNode xmlMac in xmlMacs)
+            XmlNode xmlRoot = xmlDoc.SelectSingleNode("Root");
+            XmlNodeList xmlClients = xmlRoot.SelectNodes("Client");
+            foreach (XmlNode xmlClient in xmlClients)
             {
-                Mac_Info macInfo = new Mac_Info();
-                XmlElement xe = (XmlElement)xmlMac;
-                macInfo.name = xe.GetAttribute("name");
-                macInfo.number = ByteStrToBytes(xe.GetAttribute("number"));
-                macInfo.data = ByteStrToBytes(xe.GetAttribute("data")).ToList();
-                macInfos.Add(macInfo);
+                XmlElement client = (XmlElement)xmlClient;
+                IPAddress ipAddress = IPAddress.Parse(client.GetAttribute("serverIPAddr"));
+                int port = int.Parse(client.GetAttribute("serverPort"));
+                IPEndPoint serverPoint = new IPEndPoint(ipAddress, port);
+                XmlNodeList xmlMacs = xmlClient.SelectNodes("Mac");
+                foreach (XmlNode xmlMac in xmlMacs)
+                {
+                    Mac_Info macInfo = new Mac_Info();
+                    macInfo.serverPoint = serverPoint;
+                    XmlElement mac = (XmlElement)xmlMac;
+                    macInfo.name = mac.GetAttribute("name");
+                    macInfo.number = IntToByte2(int.Parse(mac.GetAttribute("number")));
+                    string strI = mac.GetAttribute("i_data");
+                    string strV = mac.GetAttribute("v_data");
+                    if (strI.Contains(',') && strV.Contains(','))
+                    {
+                        string[] iStrs = strI.Split(',');
+                        string[] vStrs = strV.Split(',');
+                        int dataLen = iStrs.Length + vStrs.Length;
+                        int div = 100;
+                        if (dataLen > 33)
+                        {
+                            div = 10;
+                        }
+                        foreach (string iStr in iStrs)
+                        {
+                            int iData = (int)(float.Parse(iStr) * div);
+                            byte iHeigh = (byte)(iData % 256);
+                            byte iLow = (byte)(iData / 256);
+                            macInfo.data.Add(iHeigh);
+                            macInfo.data.Add(iLow);
+                        }
+                        foreach (string vStr in vStrs)
+                        {
+                            int vData = (int)(float.Parse(vStr) * div);
+                            byte vHeigh = (byte)(vData % 256);
+                            byte vLow = (byte)(vData / 256);
+                            macInfo.data.Add(vHeigh);
+                            macInfo.data.Add(vLow);
+                        }
+                    }
+                    macInfos.Add(macInfo);
+                }
             }
             return macInfos;
         }

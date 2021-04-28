@@ -12,75 +12,131 @@ namespace CSS8_IEC_Client
 {
     public partial class Client_Form : Form
     {
-        public static IPEndPoint serverPoint = null;
         public static List<Mac_Info> macInfos = new List<Mac_Info>();//用户已经添加的设备列表
         public static int _index = -1;//当前所选设备的下标
-        public static bool isConnectCOmplete = false;
         public static string xmlPath = @".\MacInfos.xml";
         public Client_Form()
         {
             InitializeComponent();
+            //添加设备
+            AddMac();
             //绑定清除接收按钮点击事件
-            Clear_Recv_Str_Button.Click += ClearRecvStr;
+            Clear_Recv_Str_Button.Click += Clear_Recv_Str_Button_Click;
             //设备列表选择事件
-            Mac_ListView.SelectedIndexChanged += PrintMessage;
-            //处理XML设备
-            serverPoint = Utils.XmlToServerPoint(xmlPath);
-            macInfos = Utils.XmlToMacInfos(xmlPath);
-            AddMacsToListView(macInfos);
-            Thread t = new Thread(() => MacsConnectServer(macInfos));
-            t.IsBackground = true;
-            t.Start();
+            Mac_ListView.SelectedIndexChanged += Mac_ListView_SelectedIndexChanged;
+            //一减连接按钮点击事件
+            Connect_Button.Click += Connect_Button_Click;
         }
 
-        public void AddMacsToListView(List<Mac_Info> macInfos)
-        {
-            foreach (Mac_Info macInfo in macInfos)
-            {
-                ListViewItem item = new ListViewItem();
-                item.Text = "";
-                item.SubItems.Add(macInfo.name);
-                item.SubItems.Add("0x" + macInfo.number[0].ToString("X") + macInfo.number[1].ToString("X"));
-                item.SubItems.Add("未连接");
-                Mac_ListView.Items.Add(item);
-            }
-            if (macInfos.Count != 0)
-            {
-                Mac_ListView.Items[0].Selected = true;
-            }
-        }
-
-        public void MacsConnectServer(List<Mac_Info> macInfos)
+        /*
+         * 控件绑定函数
+         */
+        public void Clear_Recv_Str_Button_Click(object sender, EventArgs e)
         {
             for (int i = 0; i < macInfos.Count; i++)
             {
-                //判断是否连接成功
-                try
-                {
-                    macInfos[i].socket.Connect(serverPoint);
-                    Mac_ListView.EndInvoke(Mac_ListView.BeginInvoke(new Action(() => {
-                        Mac_ListView.Items[i].SubItems[3].Text = "已连接";
-                    })));
-                    //若已连接则开始收发
-                    isConnectCOmplete = false;
-                    Thread t = new Thread(() => RecvAndSend(macInfos[i], i));
-                    t.IsBackground = true;
-                    t.Start();
-                    while (!isConnectCOmplete) { }
-                }
-                catch (Exception)
-                {
-                    Mac_ListView.EndInvoke(Mac_ListView.BeginInvoke(new Action(() => {
-                        Mac_ListView.Items[i].SubItems[3].Text = "未连接";
-                    })));
-                }
+                macInfos[_index].recvData = "";
+            }
+            IAsyncResult result = Recv_TextBox.BeginInvoke(new Action(() => {
+                Recv_TextBox.Text = "";
+            }));
+            Recv_TextBox.EndInvoke(result);
+        }
+
+        public void Mac_ListView_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            //判断是否选择了设备
+            if (Mac_ListView.SelectedItems.Count != 0)
+            {
+                //若选择了设备则显示对应设备接收到的信息
+                _index = ((ListView)sender).SelectedItems[0].Index;
+                Recv_TextBox.Text = macInfos[_index].recvData;
             }
         }
 
-        public void RecvAndSend(Mac_Info macInfo, int index)
+        public void Connect_Button_Click(object sender, EventArgs e)
         {
-            isConnectCOmplete = true;
-            while (true)
+            foreach (Mac_Info macInfo in macInfos)
+            {
+                Thread t = new Thread(() => MacConnectServer(macInfo, this));
+                t.IsBackground = true;
+                t.Start();
+            }
+        }
+
+        /*
+         * 非静态函数，线程不安全，但占用资源较少
+         */
+        public void AddMac()
+        {
+            macInfos = Utils.XmlToMacInfos(xmlPath);
+            //添加设备
+            for (int i = 0; i < macInfos.Count; i++)
+            {
+                ListViewItem item = new ListViewItem();
+                item.Text = "";
+                item.SubItems.Add(macInfos[i].name);
+                int number = macInfos[i].number[0] * 256 + macInfos[i].number[1];
+                item.SubItems.Add(number.ToString());
+                item.SubItems.Add("未连接");
+                Mac_ListView.Items.Add(item);
+            }
+        }
+
+        public void RemoveMac(Mac_Info macInfo)
+        {
+            int index = macInfos.IndexOf(macInfo);
+            macInfo.isDelete = true;
+            if (macInfo.isCanRecive)
+            {
+                macInfo.isCanRecive = false;
+            }
+            else
+            {
+                macInfo.socket.Close();
+                macInfos.Remove(macInfo);
+            }
+            Mac_ListView.Items.Remove(Mac_ListView.Items[index]);
+        }
+
+        /*
+         * 静态函数，线程安全，但占用较多资源
+         */
+        public static void MacConnectServer(Mac_Info macInfo, Client_Form form)
+        {
+            int index = macInfos.IndexOf(macInfo);
+            if (!macInfo.socket.Connected)
+            {
+                //判断是否连接成功
+                form.Mac_ListView.EndInvoke(form.Mac_ListView.BeginInvoke(new Action(() => {
+                    form.Mac_ListView.Items[index].SubItems[3].Text = "连接中";
+                })));
+                try
+                {
+                    macInfo.socket.Connect(macInfo.serverPoint);
+                }
+                catch (Exception)
+                {
+                    form.Mac_ListView.EndInvoke(form.Mac_ListView.BeginInvoke(new Action(() => {
+                        form.Mac_ListView.Items[index].SubItems[3].Text = "未连接";
+                    })));
+                    return;
+                }
+                form.Mac_ListView.EndInvoke(form.Mac_ListView.BeginInvoke(new Action(() => {
+                    form.Mac_ListView.Items[index].SubItems[3].Text = "已连接";
+                })));
+                //若已连接则开始收发
+                macInfo.isCanRecive = true;
+                Thread t = new Thread(() => RecvAndSend(macInfo, form));
+                t.IsBackground = true;
+                t.Start();
+            }
+        }
+
+        public static void RecvAndSend(Mac_Info macInfo, Client_Form form)
+        {
+            int index = macInfos.IndexOf(macInfo);
+            while (macInfo.isCanRecive)
             {
                 //接受服务器发送的信息
                 byte[] recvBuffer = new byte[1024];
@@ -92,11 +148,10 @@ namespace CSS8_IEC_Client
                 catch (Exception)
                 {
                     macInfo.socket.Close();
-                    IAsyncResult result = Mac_ListView.BeginInvoke(new Action(() => {
-                        Mac_ListView.Items[index].SubItems[3].Text = "未连接";
-                    }));
-                    Mac_ListView.EndInvoke(result);
-                    break;
+                    form.Mac_ListView.EndInvoke(form.Mac_ListView.BeginInvoke(new Action(() => {
+                        form.Mac_ListView.Items[index].SubItems[3].Text = "未连接";
+                    })));
+                    return;
                 }
                 byte[] realData = recvBuffer.Skip(0).Take(recvDataLen).ToArray();
                 //清楚缓冲区
@@ -109,11 +164,10 @@ namespace CSS8_IEC_Client
                     if (macInfo.socket.Available <= 0)
                     {
                         macInfo.socket.Close();
-                        IAsyncResult result = Mac_ListView.BeginInvoke(new Action(() => {
-                            Mac_ListView.Items[index].SubItems[3].Text = "未连接";
-                        }));
-                        Mac_ListView.EndInvoke(result);
-                        break;
+                        form.Mac_ListView.EndInvoke(form.Mac_ListView.BeginInvoke(new Action(() => {
+                            form.Mac_ListView.Items[index].SubItems[3].Text = "未连接";
+                        })));
+                        return;
                     }
                 }
                 //若收到的消息不为空
@@ -134,10 +188,10 @@ namespace CSS8_IEC_Client
                     macInfo.recvData += realStr;
                     if (index == _index)
                     {
-                        IAsyncResult result = Recv_TextBox.BeginInvoke(new Action(() => {
-                            Recv_TextBox.Text = macInfo.recvData;
+                        IAsyncResult result = form.Recv_TextBox.BeginInvoke(new Action(() => {
+                            form.Recv_TextBox.Text = macInfo.recvData;
                         }));
-                        Recv_TextBox.EndInvoke(result);
+                        form.Recv_TextBox.EndInvoke(result);
                     }
                     //获取帧中的信息
                     Frame_Info frameInfo = Utils.DivideFrame(realData);
@@ -203,29 +257,10 @@ namespace CSS8_IEC_Client
                     }
                 }
             }
-        }
-
-        public void PrintMessage(object sender, EventArgs e)
-        {
-            //判断是否选择了设备
-            if (Mac_ListView.SelectedItems.Count != 0)
+            if (macInfo.isDelete)
             {
-                //若选择了设备则显示对应设备接收到的信息
-                _index = ((ListView)sender).SelectedItems[0].Index;
-                Recv_TextBox.Text = macInfos[_index].recvData;
+                form.RemoveMac(macInfo);
             }
-        }
-
-        public void ClearRecvStr(object sender, EventArgs e)
-        {
-            for (int i = 0; i < macInfos.Count; i++)
-            {
-                macInfos[_index].recvData = "";
-            }
-            IAsyncResult result = Recv_TextBox.BeginInvoke(new Action(() => {
-                Recv_TextBox.Text = "";
-            }));
-            Recv_TextBox.EndInvoke(result);
         }
     }
 }

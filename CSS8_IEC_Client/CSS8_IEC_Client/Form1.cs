@@ -24,8 +24,12 @@ namespace CSS8_IEC_Client
             Clear_Recv_Str_Button.Click += Clear_Recv_Str_Button_Click;
             //设备列表选择事件
             Mac_ListView.SelectedIndexChanged += Mac_ListView_SelectedIndexChanged;
-            //一减连接按钮点击事件
+            //一键连接按钮点击事件
             Connect_Button.Click += Connect_Button_Click;
+            //一键断开按钮点击事件
+            Disconnect_Button.Click += Disconnect_Button_Click;
+            //刷新按钮点击事件
+            Refresh_Button.Click += Refresh_Button_Click;
         }
 
         /*
@@ -62,6 +66,25 @@ namespace CSS8_IEC_Client
                 t.IsBackground = true;
                 t.Start();
             }
+        }
+
+        public void Disconnect_Button_Click(object sender, EventArgs e)
+        {
+            foreach (Mac_Info macInfo in macInfos)
+            {
+                if (macInfo.isCanRecive)
+                {
+                    macInfo.isCanRecive = false;
+                }
+                macInfo.socket.Close();
+                macInfo.socket = null;
+            }
+        }
+
+        public void Refresh_Button_Click(object sender, EventArgs e)
+        {
+            Mac_ListView.Items.Clear();
+            AddMac();
         }
 
         /*
@@ -105,6 +128,10 @@ namespace CSS8_IEC_Client
         public static void MacConnectServer(Mac_Info macInfo, Client_Form form)
         {
             int index = macInfos.IndexOf(macInfo);
+            if (macInfo.socket == null)
+            {
+                macInfo.socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            }
             if (!macInfo.socket.Connected)
             {
                 //判断是否连接成功
@@ -148,6 +175,7 @@ namespace CSS8_IEC_Client
                 catch (Exception)
                 {
                     macInfo.socket.Close();
+                    macInfo.socket = null;
                     form.Mac_ListView.EndInvoke(form.Mac_ListView.BeginInvoke(new Action(() => {
                         form.Mac_ListView.Items[index].SubItems[3].Text = "未连接";
                     })));
@@ -164,6 +192,7 @@ namespace CSS8_IEC_Client
                     if (macInfo.socket.Available <= 0)
                     {
                         macInfo.socket.Close();
+                        macInfo.socket = null;
                         form.Mac_ListView.EndInvoke(form.Mac_ListView.BeginInvoke(new Action(() => {
                             form.Mac_ListView.Items[index].SubItems[3].Text = "未连接";
                         })));
@@ -257,10 +286,11 @@ namespace CSS8_IEC_Client
                     }
                 }
             }
-            if (macInfo.isDelete)
-            {
-                form.RemoveMac(macInfo);
-            }
+            macInfo.socket.Close();
+            macInfo.socket = null;
+            form.Mac_ListView.EndInvoke(form.Mac_ListView.BeginInvoke(new Action(() => {
+                form.Mac_ListView.Items[index].SubItems[3].Text = "未连接";
+            })));
         }
     }
 }

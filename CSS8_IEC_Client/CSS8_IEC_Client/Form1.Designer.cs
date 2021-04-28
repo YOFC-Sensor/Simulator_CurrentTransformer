@@ -37,8 +37,9 @@ namespace CSS8_IEC_Client
             this.Recv_TextBox = new System.Windows.Forms.TextBox();
             this.Recv_Label = new System.Windows.Forms.Label();
             this.Clear_Recv_Str_Button = new System.Windows.Forms.Button();
-            this.Refresh_Button = new System.Windows.Forms.Button();
             this.Connect_Button = new System.Windows.Forms.Button();
+            this.Disconnect_Button = new System.Windows.Forms.Button();
+            this.Refresh_Button = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // Mac_ListView
@@ -108,31 +109,41 @@ namespace CSS8_IEC_Client
             this.Clear_Recv_Str_Button.Text = "清除";
             this.Clear_Recv_Str_Button.UseVisualStyleBackColor = true;
             // 
-            // Refresh_Button
-            // 
-            this.Refresh_Button.Location = new System.Drawing.Point(12, 12);
-            this.Refresh_Button.Name = "Refresh_Button";
-            this.Refresh_Button.Size = new System.Drawing.Size(75, 24);
-            this.Refresh_Button.TabIndex = 7;
-            this.Refresh_Button.Text = "刷新";
-            this.Refresh_Button.UseVisualStyleBackColor = true;
-            // 
             // Connect_Button
             // 
-            this.Connect_Button.Location = new System.Drawing.Point(331, 12);
+            this.Connect_Button.Location = new System.Drawing.Point(12, 12);
             this.Connect_Button.Name = "Connect_Button";
             this.Connect_Button.Size = new System.Drawing.Size(88, 24);
             this.Connect_Button.TabIndex = 8;
             this.Connect_Button.Text = "一键连接";
             this.Connect_Button.UseVisualStyleBackColor = true;
             // 
+            // Disconnect_Button
+            // 
+            this.Disconnect_Button.Location = new System.Drawing.Point(169, 12);
+            this.Disconnect_Button.Name = "Disconnect_Button";
+            this.Disconnect_Button.Size = new System.Drawing.Size(88, 24);
+            this.Disconnect_Button.TabIndex = 9;
+            this.Disconnect_Button.Text = "一键断开";
+            this.Disconnect_Button.UseVisualStyleBackColor = true;
+            // 
+            // Refresh_Button
+            // 
+            this.Refresh_Button.Location = new System.Drawing.Point(331, 12);
+            this.Refresh_Button.Name = "Refresh_Button";
+            this.Refresh_Button.Size = new System.Drawing.Size(88, 24);
+            this.Refresh_Button.TabIndex = 10;
+            this.Refresh_Button.Text = "刷新";
+            this.Refresh_Button.UseVisualStyleBackColor = true;
+            // 
             // Client_Form
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(912, 450);
-            this.Controls.Add(this.Connect_Button);
             this.Controls.Add(this.Refresh_Button);
+            this.Controls.Add(this.Disconnect_Button);
+            this.Controls.Add(this.Connect_Button);
             this.Controls.Add(this.Clear_Recv_Str_Button);
             this.Controls.Add(this.Recv_Label);
             this.Controls.Add(this.Recv_TextBox);
@@ -153,8 +164,9 @@ namespace CSS8_IEC_Client
         private System.Windows.Forms.TextBox Recv_TextBox;
         private System.Windows.Forms.Label Recv_Label;
         private System.Windows.Forms.Button Clear_Recv_Str_Button;
-        private System.Windows.Forms.Button Refresh_Button;
         private System.Windows.Forms.Button Connect_Button;
+        private System.Windows.Forms.Button Disconnect_Button;
+        private System.Windows.Forms.Button Refresh_Button;
     }
 }
 

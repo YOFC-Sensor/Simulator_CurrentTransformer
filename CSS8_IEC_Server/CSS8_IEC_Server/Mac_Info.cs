@@ -20,5 +20,6 @@ namespace CSS8_IEC_Server
         public bool isCycleSend = false;
         public bool isUserDisconnect = false;
         public bool isSocketError = false;
+        public bool isPrepDelete = false;
     }
 }

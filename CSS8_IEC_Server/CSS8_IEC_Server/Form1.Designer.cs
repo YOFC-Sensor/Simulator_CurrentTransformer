@@ -122,7 +122,7 @@ namespace CSS8_IEC_Server
             this.Edit_Mac_Button.Name = "Edit_Mac_Button";
             this.Edit_Mac_Button.Size = new System.Drawing.Size(85, 24);
             this.Edit_Mac_Button.TabIndex = 12;
-            this.Edit_Mac_Button.Text = "修改设备";
+            this.Edit_Mac_Button.Text = "修改站号";
             this.Edit_Mac_Button.UseVisualStyleBackColor = true;
             // 
             // Start_Server_Button

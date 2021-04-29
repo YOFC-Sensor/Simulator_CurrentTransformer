@@ -3,12 +3,22 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Windows.Forms;
 using System.Xml;
 
 namespace CSS8_IEC_Server
 {
     public class Utils
     {
+        public static void Delay(int milliSecond)
+        {
+            int start = Environment.TickCount;
+            while (Math.Abs(Environment.TickCount - start) < milliSecond)
+            {
+                Application.DoEvents();
+            }
+        }
+
         public static byte[] IntToByte2(int data)
         {
             byte heigh = (byte)(data / 256);

@@ -133,7 +133,7 @@ namespace CSS8_IEC_Client
             this.Refresh_Button.Name = "Refresh_Button";
             this.Refresh_Button.Size = new System.Drawing.Size(88, 24);
             this.Refresh_Button.TabIndex = 10;
-            this.Refresh_Button.Text = "刷新";
+            this.Refresh_Button.Text = "重置设备";
             this.Refresh_Button.UseVisualStyleBackColor = true;
             // 
             // Client_Form

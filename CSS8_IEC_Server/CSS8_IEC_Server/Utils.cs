@@ -190,14 +190,14 @@ namespace CSS8_IEC_Server
             data.RemoveRange(0, 2);
             //将帧中的数据组装成字典
             List<Dictionary<string, double>> totalJsonData = new List<Dictionary<string, double>>();
-            for (int i = 0; i < data.Count; i = i + 2)
+            for (int i = 0; i < (data.Count / 2); i = i + 2)
             {
                 int t = 0;
                 Dictionary<string, double> jsonData = new Dictionary<string, double>();
                 t = i;
-                jsonData.Add("mac_" + number.ToString() + "_sersor_" + (i / 2).ToString() + "_current", ByteToDouble(data.Skip(t).Take(t + 2).ToArray(), accuracy));
-                t = i + 8;
-                jsonData.Add("mac_" + number.ToString() + "_sersor_" + (i / 2).ToString() + "_voltage", ByteToDouble(data.Skip(t).Take(t + 2).ToArray(), accuracy));
+                jsonData.Add("sensor_" + number.ToString() + "_" + (i / 2).ToString() + "_A", ByteToDouble(data.Skip(t).Take(2).ToArray(), accuracy));
+                t = i + data.Count / 2;
+                jsonData.Add("sensor_" + number.ToString() + "_" + (i / 2).ToString() + "_V", ByteToDouble(data.Skip(t).Take(2).ToArray(), accuracy));
                 totalJsonData.Add(jsonData);
             }
             //将每个传感器的数据发送给http服务器

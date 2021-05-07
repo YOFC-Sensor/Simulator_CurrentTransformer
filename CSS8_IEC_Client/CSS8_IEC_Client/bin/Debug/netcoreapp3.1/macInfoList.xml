@@ -1,0 +1,6 @@
+<Root>
+	<Client serverIPAddr="" serverPort="">
+		<Mac name="MAC1" number="" i_data="" v_data="" />
+		<Mac name="MAC2" number="" i_data="" v_data="" />
+	</Client>
+</Root>

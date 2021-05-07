@@ -5,14 +5,14 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-using static CSS8_IEC_Server.Form1;
+using static CSS8_IEC_Server.Server_Form;
 
 namespace CSS8_IEC_Server
 {
     public partial class Form2 : Form
     {
         private Forma1Delegate form1Del;
-        public static Mac_Info _macInfo = null;
+        public static MacInfo _macInfo = null;
         public Form2(Forma1Delegate del)
         {
             form1Del = del;
@@ -26,7 +26,7 @@ namespace CSS8_IEC_Server
 
         public void Edit_MAC_OK_Button_Click(object sender, EventArgs e)
         {
-            Mac_Info macInfo = new Mac_Info();
+            MacInfo macInfo = new MacInfo();
             macInfo = _macInfo;
             try
             {

@@ -10,12 +10,19 @@ using System.Windows.Forms;
 
 namespace CSS8_IEC_Client
 {
+    public enum ConnectState
+    {
+        HasConnect = 0,
+        DisConnect = 1
+    }
+
     public partial class Client_Form : Form
     {
-        public static List<Mac_Info> macInfos = new List<Mac_Info>();//用户已经添加的设备列表
-        public static int _index = -1;//当前所选设备的下标
-        public static string xmlPath = @".\MacInfos.xml";
-        public static Mutex mtu = new Mutex();
+        public static ReciveAndAnalysis reciveAndAnalysis = new ReciveAndAnalysis();
+        public static ComposeAndSend composeAndSend = new ComposeAndSend();
+        public static List<MacInfo> macInfoList = new List<MacInfo>();//用户已经添加的设备列表
+        public static int currentSekectIndex = -1;//当前所选设备的下标
+        public static string xmlPath = @".\macInfoList.xml";//XML文件路径
         public Client_Form()
         {
             InitializeComponent();
@@ -38,24 +45,27 @@ namespace CSS8_IEC_Client
          */
         public void Clear_Recv_Str_Button_Click(object sender, EventArgs e)
         {
-            for (int i = 0; i < macInfos.Count; i++)
+            if (currentSekectIndex != -1)
             {
-                macInfos[_index].recvData = "";
+                macInfoList[currentSekectIndex].recvData = "";
+                Recv_TextBox.EndInvoke(Recv_TextBox.BeginInvoke(new Action(() => {
+                    Recv_TextBox.Text = "";
+                })));
             }
-            IAsyncResult result = Recv_TextBox.BeginInvoke(new Action(() => {
-                Recv_TextBox.Text = "";
-            }));
-            Recv_TextBox.EndInvoke(result);
+            else
+            {
+                MessageBox.Show("请先选择设备！");
+            }
         }
 
         public void Mac_ListView_SelectedIndexChanged(object sender, EventArgs e)
         {
             //判断是否选择了设备
-            if (Mac_ListView.SelectedItems.Count != 0)
+            if (((ListView)sender).SelectedItems.Count != 0)
             {
                 //若选择了设备则显示对应设备接收到的信息
-                _index = ((ListView)sender).SelectedItems[0].Index;
-                Recv_TextBox.Text = macInfos[_index].recvData;
+                currentSekectIndex = ((ListView)sender).SelectedItems[0].Index;
+                Recv_TextBox.Text = macInfoList[currentSekectIndex].recvData;
             }
         }
 
@@ -68,12 +78,12 @@ namespace CSS8_IEC_Client
 
         public void Disconnect_Button_Click(object sender, EventArgs e)
         {
-            for (int i = 0; i < macInfos.Count; i++)
+            for (int i = 0; i < macInfoList.Count; i++)
             {
-                if (macInfos[i].socket.Connected)
+                if (macInfoList[i].socket.Connected)
                 {
-                    macInfos[i].isCanRecive = false;
-                    macInfos[i].socket.Disconnect(true);
+                    macInfoList[i].isCanRecive = false;
+                    macInfoList[i].socket.Disconnect(true);
                     Mac_ListView.EndInvoke(Mac_ListView.BeginInvoke(new Action(() => {
                         Mac_ListView.Items[i].SubItems[3].Text = "未连接";
                     })));
@@ -83,9 +93,9 @@ namespace CSS8_IEC_Client
 
         public void Refresh_Button_Click(object sender, EventArgs e)
         {
-            for (int i = 0; i < macInfos.Count; i++)
+            for (int i = 0; i < macInfoList.Count; i++)
             {
-                if (macInfos[i].socket.Connected)
+                if (macInfoList[i].socket.Connected)
                 {
                     MessageBox.Show("请先断开所有设备！");
                     return;
@@ -95,34 +105,37 @@ namespace CSS8_IEC_Client
             AddMac();
         }
 
-        /*
-         * 非静态函数，线程不安全，但占用资源较少
-         */
+        /// <summary>
+        /// 将设备信息添加到ListView中
+        /// </summary>
         public void AddMac()
         {
-            macInfos = Utils.XmlToMacInfos(xmlPath);
+            macInfoList = Utils.XmlTomacInfoList(xmlPath);
             //添加设备
-            for (int i = 0; i < macInfos.Count; i++)
+            for (int i = 0; i < macInfoList.Count; i++)
             {
                 ListViewItem item = new ListViewItem();
                 item.Text = "";
-                item.SubItems.Add(macInfos[i].name);
-                int number = macInfos[i].number[0] * 256 + macInfos[i].number[1];
+                item.SubItems.Add(macInfoList[i].name);
+                int number = macInfoList[i].number[0] * 256 + macInfoList[i].number[1];
                 item.SubItems.Add(number.ToString());
                 item.SubItems.Add("未连接");
                 Mac_ListView.Items.Add(item);
             }
-            if (macInfos.Count > 0)
+            if (macInfoList.Count > 0)
             {
                 Mac_ListView.Items[0].Selected = true;
             }
         }
 
+        /// <summary>
+        /// 设备连接服务器
+        /// </summary>
         public void MacConnectServer()
         {
-            foreach (Mac_Info macInfo in macInfos)
+            foreach (MacInfo macInfo in macInfoList)
             {
-                int index = macInfos.IndexOf(macInfo);
+                int index = macInfoList.IndexOf(macInfo);
                 if (!macInfo.socket.Connected)
                 {
                     macInfo.socket.Close();
@@ -154,136 +167,48 @@ namespace CSS8_IEC_Client
             }
         }
 
-        /*
-         * 静态函数，线程安全，但占用较多资源
-         */
-        public static void RecvAndSend(Mac_Info macInfo, Client_Form form)
+        /// <summary>
+        /// 设备接受和发送程序
+        /// </summary>
+        /// <param name="macInfo"></param>
+        /// <param name="form"></param>
+        public static void RecvAndSend(MacInfo macInfo, Client_Form form)
         {
-            int index = macInfos.IndexOf(macInfo);
+            int index = macInfoList.IndexOf(macInfo);
             while (macInfo.isCanRecive)
             {
                 //接受服务器发送的信息
-                byte[] recvBuffer = new byte[1024];
-                int recvDataLen = 0;
-                try
-                {
-                    recvDataLen = macInfo.socket.Receive(recvBuffer);
-                }
-                catch (Exception)
+                byte[] recvFrame = reciveAndAnalysis.ReciveFrame(macInfo.socket, form);
+                if (recvFrame == null)
                 {
                     form.Mac_ListView.EndInvoke(form.Mac_ListView.BeginInvoke(new Action(() => {
                         form.Mac_ListView.Items[index].SubItems[3].Text = "未连接";
                     })));
-                    return;
-                }
-                byte[] realData = recvBuffer.Skip(0).Take(recvDataLen).ToArray();
-                //清楚缓冲区
-                Array.Clear(recvBuffer, 0, recvBuffer.Length);
-                recvDataLen = 0;
-                //判断是否主动断开
-                if (!macInfo.socket.Connected)
-                {
-                    form.Mac_ListView.EndInvoke(form.Mac_ListView.BeginInvoke(new Action(() => {
-                        form.Mac_ListView.Items[index].SubItems[3].Text = "未连接";
-                    })));
-                    return;
-                }
-                //判断服务器是否断开
-                if (macInfo.socket.Poll(1000, SelectMode.SelectRead))
-                {
-                    if (macInfo.socket.Available <= 0)
-                    {
-                        macInfo.socket.Disconnect(true);
-                        form.Mac_ListView.EndInvoke(form.Mac_ListView.BeginInvoke(new Action(() => {
-                            form.Mac_ListView.Items[index].SubItems[3].Text = "未连接";
-                        })));
-                        return;
-                    }
+                    break;
                 }
                 //若收到的消息不为空
-                if (realData.Length > 0)
+                if (recvFrame.Length > 0)
                 {
-                    //显示接收到的信息
-                    string realStr = "";
-                    foreach (byte data in realData)
+                    //展示信息
+                    string recvStr = "";
+                    foreach (byte b in recvFrame)
                     {
-                        string str = data.ToString("X").ToUpper();
-                        if (str.Length == 1)
-                        {
-                            str = "0" + str;
-                        }
-                        realStr += str;
+                        recvStr += b.ToString("X");
                     }
-                    realStr += "\r\n";
-                    macInfo.recvData += realStr;
-                    if (index == _index)
+                    recvStr += "\r\n";
+                    form.Recv_TextBox.EndInvoke(form.Recv_TextBox.BeginInvoke(new Action(() => {
+                        form.Recv_TextBox.Text += recvStr;
+                    })));
+                    //获取数据信息
+                    DataInfo dataInfo = new DataInfo();
+                    dataInfo = reciveAndAnalysis.GetDataInfo(recvFrame);
+                    //判断是否可以发送消息
+                    if (composeAndSend.isCanSend(dataInfo, macInfo.number))
                     {
-                        IAsyncResult result = form.Recv_TextBox.BeginInvoke(new Action(() => {
-                            form.Recv_TextBox.Text = macInfo.recvData;
-                        }));
-                        form.Recv_TextBox.EndInvoke(result);
-                    }
-                    //获取帧中的信息
-                    Frame_Info frameInfo = Utils.DivideFrame(realData);
-                    int frameType = 0;
-                    //判断帧的类型
-                    switch (frameInfo.header)
-                    {
-                        case 0x10:
-                            frameType = 0;
-                            break;
-                        case 0x68:
-                            frameType = 1;
-                            break;
-                        default:
-                            continue;
-                    }
-                    //判断是否发送消息
-                    bool canSend = false;
-                    if (frameType == 1)
-                    {
-                        //判断可变帧的命令类型
-                        int dataType = 0;
-                        ASDU_Info aSDUInfo = Utils.DivideASDU(frameInfo.asdu.ToArray());
-                        switch (aSDUInfo.type)
-                        {
-                            case 0x64:
-                                dataType = 0;
-                                break;
-                            case 0x09:
-                                dataType = 1;
-                                break;
-                            default:
-                                continue;
-                        }
-                        //若是总召命令则判断地址是否一致
-                        if (dataType == 0)
-                        {
-                            if (frameInfo.addr[0] == macInfo.number[0] && frameInfo.addr[1] == macInfo.number[1])
-                            {
-                                canSend = true;
-                            }
-                        }
-                    }
-                    //发送数据
-                    if (canSend)
-                    {
-                        macInfo.socket.Send(new byte[] { 0x00 });
-                        //组装确认帧
-                        byte[] ackFrame = Utils.CombineAckFrame(macInfo.number);
-                        //发送确认帧
-                        macInfo.socket.Send(ackFrame);
-                        Task.Delay(1000);
-                        //组装遥测帧
-                        byte[] telFrame = Utils.CombineTelFrame(macInfo.number, macInfo.data.ToArray());
-                        //发送遥测帧
-                        macInfo.socket.Send(telFrame);
-                        Task.Delay(1000);
-                        //组装结束帧
-                        byte[] endFrame = Utils.CombineEndFrame(macInfo.number);
-                        //发送结束帧
-                        macInfo.socket.Send(endFrame);
-                        Task.Delay(1000);
+                        //封装完整帧
+                        List<byte[]> frameList = composeAndSend.CombinedFrame(dataInfo);
+                        //发送帧
+                        composeAndSend.Send(macInfo.socket, frameList);
                     }
                 }
             }

@@ -6,7 +6,7 @@ using System.Threading;
 
 namespace CSS8_IEC_Server
 {
-    public class Mac_Info
+    public class MacInfo
     {
         public int number = 65535;
         public Socket socket = null;

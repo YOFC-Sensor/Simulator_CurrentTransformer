@@ -5,6 +5,10 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="bin\Debug\netcoreapp3.1\SersorUrls.txt" />
+  </ItemGroup>
 	
   <ItemGroup>
     <ProjectReference Include="..\..\HttpSend\HttpSend\HttpSend.csproj" />

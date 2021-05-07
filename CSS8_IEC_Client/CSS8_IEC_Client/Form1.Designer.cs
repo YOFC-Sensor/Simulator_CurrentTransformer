@@ -149,7 +149,7 @@ namespace CSS8_IEC_Client
             this.Controls.Add(this.Recv_TextBox);
             this.Controls.Add(this.Mac_ListView);
             this.Name = "Client_Form";
-            this.Text = "Form1";
+            this.Text = "客户端";
             this.ResumeLayout(false);
             this.PerformLayout();
 

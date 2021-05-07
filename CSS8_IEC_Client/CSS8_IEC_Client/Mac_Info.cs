@@ -6,7 +6,7 @@ using System.Text;
 
 namespace CSS8_IEC_Client
 {
-    public class Mac_Info
+    public class MacInfo
     {
         public string name = "";
         public IPEndPoint serverPoint = null;

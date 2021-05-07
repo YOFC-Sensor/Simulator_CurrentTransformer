@@ -1,7 +1,7 @@
 ﻿
 namespace CSS8_IEC_Server
 {
-    partial class Form1
+    partial class Server_Form
     {
         /// <summary>
         ///  Required designer variable.
@@ -193,7 +193,7 @@ namespace CSS8_IEC_Server
             this.Server_Port_Text.Size = new System.Drawing.Size(100, 23);
             this.Server_Port_Text.TabIndex = 27;
             // 
-            // Form1
+            // Server_Form
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -211,8 +211,8 @@ namespace CSS8_IEC_Server
             this.Controls.Add(this.Recv_TextBox);
             this.Controls.Add(this.Mac_ListView);
             this.Controls.Add(this.DisConnect_Button);
-            this.Name = "Form1";
-            this.Text = "Form1";
+            this.Name = "Server_Form";
+            this.Text = "服务器";
             this.ResumeLayout(false);
             this.PerformLayout();
 

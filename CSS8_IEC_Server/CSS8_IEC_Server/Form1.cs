@@ -8,20 +8,20 @@ using System.Windows.Forms;
 
 namespace CSS8_IEC_Server
 {
-    public partial class Form1 : Form
+    public partial class Server_Form : Form
     {
         //委托
-        public delegate void Forma1Delegate(Mac_Info macInfo);
+        public delegate void Forma1Delegate(MacInfo macInfo);
         //用于监听的套接字
         public static Socket serverSocket = null;
         //设备参数列表
-        public static List<Mac_Info> macInfos = new List<Mac_Info>();
+        public static List<MacInfo> macInfos = new List<MacInfo>();
         //多线程通信用参数
         public static int _index = -1;
         public static string xmlPath = @".\SensorUrls.xml";
         public static List<List<string>> totalSensorUrls = new List<List<string>>();
         public static Mutex mtu = new Mutex();//线程锁
-        public Form1()
+        public Server_Form()
         {
             InitializeComponent();
             //选择设备列表事件
@@ -54,7 +54,7 @@ namespace CSS8_IEC_Server
         public void Get_Data_Button_Click(object sender, EventArgs e)
         {
             int index = Mac_ListView.SelectedItems[0].Index;
-            Mac_Info macInfo = macInfos[index];
+            MacInfo macInfo = macInfos[index];
             if (!macInfo.isCycleSend)
             {
                 macInfo.isCycleSend = true;
@@ -103,7 +103,7 @@ namespace CSS8_IEC_Server
         {
             int index = Mac_ListView.SelectedItems[0].Index;
             //关闭设备的套接字
-            Mac_Info macInfo = macInfos[index];
+            MacInfo macInfo = macInfos[index];
             macInfo.isUserDisconnect = true;
             macInfo.socket.Disconnect(true);
         }
@@ -159,7 +159,7 @@ namespace CSS8_IEC_Server
             for (int i = macInfos.Count - 1; i >= 0; i--)
             {
                 //关闭套接字
-                Mac_Info macInfo = macInfos[i];
+                MacInfo macInfo = macInfos[i];
                 macInfo.isUserDisconnect = true;
                 macInfo.socket.Disconnect(true);
             }
@@ -183,7 +183,7 @@ namespace CSS8_IEC_Server
                 return;
             }
             //添加第一个设备到内存列表
-            Mac_Info macInfo = new Mac_Info();
+            MacInfo macInfo = new MacInfo();
             macInfo.socket = socket;
             macInfos.Add(macInfo);
             //将客户端信息显示到客户端
@@ -221,7 +221,7 @@ namespace CSS8_IEC_Server
             })));
         }
 
-        public void RemoveMac(Mac_Info macInfo)
+        public void RemoveMac(MacInfo macInfo)
         {
             int index = macInfos.IndexOf(macInfo);
             macInfos.Remove(macInfo);
@@ -256,7 +256,7 @@ namespace CSS8_IEC_Server
             }
         }
 
-        public void EditMacInfo(Mac_Info macInfo)
+        public void EditMacInfo(MacInfo macInfo)
         {
             Mac_ListView.SelectedItems[0].SubItems[2].Text = macInfo.number.ToString();
         }
@@ -264,7 +264,7 @@ namespace CSS8_IEC_Server
         /*
          * 用于多线程的函数(静态函数，线程安全，但占用资源较多)
          */
-        public static void JudgeAlive(Mac_Info macInfo, Form1 form)
+        public static void JudgeAlive(MacInfo macInfo, Server_Form form)
         {
             while (true)
             {
@@ -280,7 +280,7 @@ namespace CSS8_IEC_Server
             }
         }
 
-        public void CycleSendAndRecv(Mac_Info macInfo, Form1 form)
+        public void CycleSendAndRecv(MacInfo macInfo, Server_Form form)
         {
             //获取全部的Url
             totalSensorUrls = Utils.GetTotalSensorUrls(xmlPath);
@@ -374,7 +374,7 @@ namespace CSS8_IEC_Server
             }
         }
 
-        public static void ReciveData(Mac_Info macInfo, Form1 form)
+        public static void ReciveData(MacInfo macInfo, Server_Form form)
         {
             while (macInfo.socket.Connected)
             {

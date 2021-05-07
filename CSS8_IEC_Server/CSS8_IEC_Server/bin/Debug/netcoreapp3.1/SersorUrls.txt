@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Server>
+	<Mac>
+		<Sersor url="http://192.168.8.151:8080/api/v1/sensor_65535_1/telemetry" />
+		<Sersor url="http://192.168.8.151:8080/api/v1/sensor_65535_2/telemetry" />
+		<Sersor url="http://192.168.8.151:8080/api/v1/sensor_65535_3/telemetry" />
+		<Sersor url="http://192.168.8.151:8080/api/v1/sensor_65535_4/telemetry" />
+	</Mac>
+	<Mac>
+		<Sersor url="http://192.168.8.151:8080/api/v1/sensor_65534_1/telemetry" />
+		<Sersor url="http://192.168.8.151:8080/api/v1/sensor_65534_2/telemetry" />
+		<Sersor url="http://192.168.8.151:8080/api/v1/sensor_65534_3/telemetry" />
+		<Sersor url="http://192.168.8.151:8080/api/v1/sensor_65534_4/telemetry" />
+	</Mac>
+</Server>

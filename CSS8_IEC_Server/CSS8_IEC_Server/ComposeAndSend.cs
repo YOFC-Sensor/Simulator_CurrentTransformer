@@ -5,7 +5,7 @@ using System.Text;
 
 namespace CSS8_IEC_Server
 {
-    class ComposeAndSend
+    public class ComposeAndSend
     {
         private FrameHandle frameHandle = new FrameHandle();
 
@@ -17,12 +17,8 @@ namespace CSS8_IEC_Server
         public List<byte[]> CombinedFrame(DataInfo dataInfo)
         {
             List<byte[]> frameList = new List<byte[]>();
-            byte[] ackFrame = frameHandle.CombineAckFrame(dataInfo.macNumber);
-            frameList.Add(ackFrame);
-            byte[] telFrame = frameHandle.CombineTelFrame(dataInfo.macNumber, dataInfo.data.ToArray());
-            frameList.Add(telFrame);
-            byte[] endFrame = frameHandle.CombineEndFrame(dataInfo.macNumber);
-            frameList.Add(endFrame);
+            byte[] masterCallFrame = frameHandle.CombineMasterCallFrame(dataInfo.macNumber, dataInfo.fcb, dataInfo.fcv);
+            frameList.Add(masterCallFrame);
             return frameList;
         }
 

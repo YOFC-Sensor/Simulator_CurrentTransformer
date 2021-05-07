@@ -9,8 +9,15 @@ namespace CSS8_IEC_Server
 {
     class Utils
     {
+        public static byte[] IntToByte2(int data)
+        {
+            byte heigh = (byte)(data / 256);
+            byte low = (byte)(data % 256);
+            byte[] result = new byte[] { heigh, low };
+            return result;
+        }
 
-        public static double ByteToDouble(byte[] data, int accuracy)
+        public static double Byte2ToDouble(byte[] data, int accuracy)
         {
             double div = Math.Pow(10, accuracy);
             double result = ((double)data[1] * 256 + (double)data[0]) / div;

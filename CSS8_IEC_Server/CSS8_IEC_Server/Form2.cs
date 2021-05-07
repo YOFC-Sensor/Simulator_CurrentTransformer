@@ -12,7 +12,7 @@ namespace CSS8_IEC_Server
     public partial class Form2 : Form
     {
         private Forma1Delegate form1Del;
-        public static MacInfo _macInfo = null;
+        public static MacInfo currentSelectMacInfo = null;
         public Form2(Forma1Delegate del)
         {
             form1Del = del;

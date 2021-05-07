@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HttpSend;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
@@ -21,7 +22,7 @@ namespace CSS8_IEC_Server
         ErrorASDU = -1
     }
 
-    class ReciveAndAnalysis
+    public class ReciveAndAnalysis
     {
         private FrameHandle frameHandle = new FrameHandle();
 
@@ -109,19 +110,73 @@ namespace CSS8_IEC_Server
         /// </summary>
         /// <param name="frame"></param>
         /// <returns></returns>
-        public DataInfo GetDataInfo(byte[] frame)
+        public List<DataInfo> GetDataInfoList(byte[] frames)
         {
-            //获取帧中的信息
-            FrameInfo frameInfo = frameHandle.DivideFrame(frame);
-            //获取帧中的数据信息
-            ASDUInfo asduInfo = frameHandle.DivideASDU(frameInfo.asdu.ToArray());
-            //获取数据信息
-            DataInfo dataInfo = new DataInfo();
-            dataInfo.frameType = GetFrameType(frameInfo.header);
-            dataInfo.asduType = GetASDUType(asduInfo.type);
-            dataInfo.data = asduInfo.data;
-            dataInfo.macNumber = frameInfo.addr;
-            return dataInfo;
+            List<DataInfo> dataInfoList = new List<DataInfo>();
+            List<byte[]> frameList = frameHandle.DivideFrames(frames);
+            foreach (byte[] frame in frameList)
+            {
+                //获取帧中的信息
+                FrameInfo frameInfo = frameHandle.DivideFrame(frame);
+                //获取帧中的数据信息
+                ASDUInfo asduInfo = frameHandle.DivideASDU(frameInfo.asdu.ToArray());
+                //获取数据信息
+                DataInfo dataInfo = new DataInfo();
+                dataInfo.frameType = GetFrameType(frameInfo.header);
+                dataInfo.asduType = GetASDUType(asduInfo.type);
+                dataInfo.data = asduInfo.data;
+                dataInfo.macNumber = frameInfo.addr;
+                dataInfoList.Add(dataInfo);
+            }
+            return dataInfoList;
+        }
+
+        public List<Dictionary<string, double>> GetJsonDataList(int number, List<byte> data)
+        {
+            List<Dictionary<string, double>> jsonDataList = new List<Dictionary<string, double>>();
+            int accuracy = 0;
+            if (data.Count > 33)
+            {
+                accuracy = 2;
+            }
+            else
+            {
+                accuracy = 1;
+            }
+            data.RemoveRange(0, 2);
+            //将帧中的数据组装成字典
+            List<Dictionary<string, double>> totalJsonData = new List<Dictionary<string, double>>();
+            for (int i = 0; i < (data.Count / 2); i = i + 2)
+            {
+                int t = 0;
+                Dictionary<string, double> jsonData = new Dictionary<string, double>();
+                t = i;
+                jsonData.Add("sensor_" + number.ToString() + "_" + (i / 2).ToString() + "_A", Utils.Byte2ToDouble(data.Skip(t).Take(2).ToArray(), accuracy));
+                t = i + data.Count / 2;
+                jsonData.Add("sensor_" + number.ToString() + "_" + (i / 2).ToString() + "_V", Utils.Byte2ToDouble(data.Skip(t).Take(2).ToArray(), accuracy));
+                totalJsonData.Add(jsonData);
+            }
+            return jsonDataList;
+        }
+
+        public void SendToHttpServer(List<DataInfo> dataInfos, List<string> urls)
+        {
+            foreach (DataInfo dataInfo in dataInfos)
+            {
+                DataInfo correctDataInfo = new DataInfo();
+                correctDataInfo.frameType = FrameType.NotFixedFrame;
+                correctDataInfo.asduType = ASDUType.RemoteASDU;
+                if (dataInfo.Equals(correctDataInfo))
+                {
+                    int number = dataInfo.macNumber[0] * 256 + dataInfo.macNumber[1];
+                    List<Dictionary<string, double>> jsonDataList = GetJsonDataList(number, dataInfo.data);
+                    for (int i = 0; i < urls.Count; i++)
+                    {
+                        Dictionary<string, double> jsonData = jsonDataList[i];
+                        HTTPTransmit.Send(urls[i], jsonData);
+                    }
+                }
+            }
         }
     }
 
@@ -131,11 +186,13 @@ namespace CSS8_IEC_Server
         public ASDUType asduType = ASDUType.ErrorASDU;
         public List<byte> data = new List<byte>();
         public byte[] macNumber = new byte[2];
+        public int fcb = 0;
+        public int fcv = 0;
 
         public override bool Equals(object obj)
         {
             bool isEqual = false;
-            if (frameType == ((DataInfo)obj).frameType && asduType == ((DataInfo)obj).asduType && macNumber[0] == ((DataInfo)obj).macNumber[0] && macNumber[1] == ((DataInfo)obj).macNumber[1])
+            if (frameType == ((DataInfo)obj).frameType && asduType == ((DataInfo)obj).asduType)
             {
                 isEqual = true;
             }
@@ -144,7 +201,7 @@ namespace CSS8_IEC_Server
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(frameType, asduType, data, macNumber);
+            return HashCode.Combine(frameType, asduType, data, macNumber, fcb);
         }
     }
 }

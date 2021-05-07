@@ -8,15 +8,14 @@ namespace CSS8_IEC_Server
 {
     public class MacInfo
     {
-        public int number = 65535;
+        public byte[] number = new byte[2];
         public Socket socket = null;
-        public byte[] recvBuffer = new byte[1024];
-        public int recvDataLen = 0;
+        public List<byte> recvData = new List<byte>();
         public int recvCount = 0;
         public int reSendCount = 0;
         public int FCB = 0;
+        public int FCV = 0;
         public string message = "";
-        public bool isChangeFCB = false;
         public bool isCycleSend = false;
         public bool isUserDisconnect = false;
         public bool isSocketError = false;

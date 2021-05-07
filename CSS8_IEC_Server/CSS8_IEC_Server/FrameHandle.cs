@@ -5,8 +5,32 @@ using System.Text;
 
 namespace CSS8_IEC_Server
 {
-    class FrameHandle
+    public class FrameHandle
     {
+        /// <summary>
+        /// 分割粘在一起的帧
+        /// </summary>
+        /// <param name="frames"></param>
+        /// <returns></returns>
+        public List<byte[]> DivideFrames(byte[] frames)
+        {
+            List<byte> ListFrames = frames.ToList();
+            ListFrames.Remove(ListFrames[0]);
+            frames = ListFrames.ToArray();
+            List<byte[]> frameList = new List<byte[]>();
+            while (frames.Length > 0)
+            {
+                int length = frames[1];
+                int totalLength = length + 6;
+                byte[] frame = frames.Skip(0).Take(totalLength).ToArray();
+                frameList.Add(frames);
+                List<byte> listFrames = frames.ToList();
+                listFrames.RemoveRange(0, totalLength);
+                frames = listFrames.ToArray();
+            }
+            return frameList;
+        }
+
         /// <summary>
         ///分割帧
         /// </summary>
@@ -112,18 +136,15 @@ namespace CSS8_IEC_Server
         /// </summary>
         /// <param name="macInfo"></param>
         /// <returns></returns>
-        public byte[] CombineMasterCallFrame(MacInfo macInfo)
+        public byte[] CombineMasterCallFrame(byte[] addr, int fcb, int fcv)
         {
             ASDUInfo asduInfo = new ASDUInfo();
             FrameInfo frameInfo = new FrameInfo();
-            //分解站号
-            byte heighNumber = (byte)(macInfo.number >> 8);
-            byte lowNumber = (byte)(macInfo.number & 0x00FF);
             //组装ASDU
             asduInfo.type = 0x64;
             asduInfo.vsq = 0x01;
             asduInfo.cot = 0x06;
-            asduInfo.addr = new byte[] { heighNumber, lowNumber };
+            asduInfo.addr = addr;
             asduInfo.fun = 0x00;
             asduInfo.inf = 0x00;
             asduInfo.data.Add(0x14);
@@ -131,22 +152,11 @@ namespace CSS8_IEC_Server
             //组装总控帧
             frameInfo.header = 0x68;
             frameInfo.length = 0x0b;
-            frameInfo.ctrl = (byte)(0x53 + macInfo.FCB * (int)Math.Pow(2, macInfo.FCB * 5));
-            frameInfo.addr = new byte[] { heighNumber, lowNumber };
+            frameInfo.ctrl = (byte)(0x43 + fcb * (int)Math.Pow(2, 5) + fcv * (int)Math.Pow(2, 4));
+            frameInfo.addr = addr;
             frameInfo.asdu = asdu.ToList();
             frameInfo.cs = GetCS(frameInfo.ctrl, frameInfo.addr, frameInfo.asdu.ToArray());
             byte[] frame = CombineFrame(frameInfo);
-            //判断是否改变FCB
-            byte ctrl = frameInfo.ctrl;
-            int FCV = (ctrl >> 4) & 0x01;
-            if (FCV == 0)
-            {
-                macInfo.isChangeFCB = false;
-            }
-            else
-            {
-                macInfo.isChangeFCB = true;
-            }
             return frame;
         }
     }

@@ -337,7 +337,7 @@ namespace CSS8_IEC_Server
                 //去除所有帧中的重要数据
                 List<DataInfo> dataInfos = reciveAndAnalysis.GetDataInfoList(realData);
                 //获取遥测帧中的传感数据并发送给http服务器
-                //reciveAndAnalysis.SendToHttpServer(dataInfos, urls);
+                reciveAndAnalysis.SendToHttpServer(dataInfos, urls);
                 //更新FCB
                 if (macInfo.FCV == 1)
                 {

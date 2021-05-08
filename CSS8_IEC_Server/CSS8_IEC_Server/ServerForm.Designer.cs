@@ -1,7 +1,7 @@
 ﻿
 namespace CSS8_IEC_Server
 {
-    partial class Server_Form
+    partial class ServerForm
     {
         /// <summary>
         ///  Required designer variable.

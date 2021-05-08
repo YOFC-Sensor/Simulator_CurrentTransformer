@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -8,7 +7,8 @@ using System.Windows.Forms;
 
 namespace CSS8_IEC_Server
 {
-    public partial class Server_Form : Form
+    public delegate void EditMac(MacInfo macInfo);//用于修改设备的委托
+    public partial class ServerForm : Form
     {
         public static FrameHandle frameHandle = new FrameHandle();
         public static ReciveAndAnalysis reciveAndAnalysis = new ReciveAndAnalysis();
@@ -19,8 +19,8 @@ namespace CSS8_IEC_Server
         public static string xmlPath = @".\SensorUrls.xml";//XML文件路径
         public static List<List<string>> totalSensorUrls = new List<List<string>>();//每个传感器数据对应的URL
         public static Mutex mtu = new Mutex();//线程锁
-        public delegate void EditMac(MacInfo macInfo);//用于修改设备的委托
-        public Server_Form()
+        
+        public ServerForm()
         {
             InitializeComponent();
             //选择设备列表事件
@@ -107,10 +107,10 @@ namespace CSS8_IEC_Server
         
         public void Edit_Mac_Button_Click(object sender, EventArgs e)
         {
-            Form2.currentSelectMacInfo = macInfoList[currentSelectIndex];
-            Forma1Delegate forma1Delegate = new Forma1Delegate(EditMacInfo);
-            Form2 form2 = new Form2(forma1Delegate);
-            form2.ShowDialog();
+            EditMACForm.currentSelectMacInfo = macInfoList[currentSelectIndex];
+            EditMac editMac = new EditMac(EditMacInfo);
+            EditMACForm editMACForm = new EditMACForm(editMac);
+            editMACForm.ShowDialog();
         }
 
         /// <summary>
@@ -194,7 +194,7 @@ namespace CSS8_IEC_Server
             //将客户端信息显示到客户端
             AddMacToListView(socket);
             //接受客户端的数据
-            Thread t = new Thread(() => ReciveData(macInfo, this));
+            Thread t = new Thread(() => CycleReciveData(macInfo, this));
             t.IsBackground = true;
             t.Start();
             //判断客户端是否在线
@@ -233,26 +233,29 @@ namespace CSS8_IEC_Server
         /// <param name="macInfo"></param>
         public void RemoveMac(MacInfo macInfo)
         {
+            int index = macInfoList.IndexOf(macInfo);
             macInfoList.Remove(macInfo);
             //删除ListView中的设备
             Mac_ListView.EndInvoke(Mac_ListView.BeginInvoke(new Action(() => {
-                Mac_ListView.Items.Remove(Mac_ListView.Items[currentSelectIndex]);
+                Mac_ListView.Items.Remove(Mac_ListView.Items[index]);
             })));
             //删除后自动选择
-            if (macInfoList.Count > 1)
+            if (macInfoList.Count > 0)
             {
-                if (currentSelectIndex > 0)
+                if (currentSelectIndex == index)
                 {
-                    Mac_ListView.EndInvoke(Mac_ListView.BeginInvoke(new Action(() => {
-                        Mac_ListView.Items[currentSelectIndex - 1].Selected = true;
-                    })));
-
-                }
-                else
-                {
-                    Mac_ListView.EndInvoke(Mac_ListView.BeginInvoke(new Action(() => {
-                        Mac_ListView.Items[currentSelectIndex + 1].Selected = true;
-                    })));
+                    if (index > 0)
+                    {
+                        Mac_ListView.EndInvoke(Mac_ListView.BeginInvoke(new Action(() => {
+                            Mac_ListView.Items[currentSelectIndex - 1].Selected = true;
+                        })));
+                    }
+                    else
+                    {
+                        Mac_ListView.EndInvoke(Mac_ListView.BeginInvoke(new Action(() => {
+                            Mac_ListView.Items[0].Selected = true;
+                        })));
+                    }
                 }
             }
             else
@@ -275,7 +278,7 @@ namespace CSS8_IEC_Server
         /// </summary>
         /// <param name="macInfo"></param>
         /// <param name="form"></param>
-        public static void JudgeAlive(MacInfo macInfo, Server_Form form)
+        public static void JudgeAlive(MacInfo macInfo, ServerForm form)
         {
             while (true)
             {
@@ -287,7 +290,7 @@ namespace CSS8_IEC_Server
                     mtu.ReleaseMutex();
                     return;
                 }
-                Thread.Sleep(1000);
+                Thread.Sleep(500);
             }
         }
 
@@ -296,12 +299,12 @@ namespace CSS8_IEC_Server
         /// </summary>
         /// <param name="macInfo"></param>
         /// <param name="form"></param>
-        public static void CycleSendAndRecv(MacInfo macInfo, Server_Form form)
+        public static void CycleSendAndRecv(MacInfo macInfo, ServerForm form)
         {
             //获取当前设备的下标
             int index = macInfoList.IndexOf(macInfo);
             //获取全部的Url
-            totalSensorUrls = Utils.GetTotalSensorUrls(xmlPath);
+            totalSensorUrls = reciveAndAnalysis.GetTotalSensorUrls(xmlPath);
             List<string> urls = totalSensorUrls[index];
             while (macInfo.isCycleSend)
             {
@@ -313,7 +316,7 @@ namespace CSS8_IEC_Server
                 do
                 {
                     tempDataLen = macInfo.recvData.Count;
-                    Thread.Sleep(100);
+                    Thread.Sleep(500);
                 } while (tempDataLen != macInfo.recvData.Count);
                 if (macInfo.recvData.Count == 0)
                 {
@@ -331,10 +334,10 @@ namespace CSS8_IEC_Server
                 byte[] realData = macInfo.recvData.ToArray();
                 //清除接收缓冲区
                 macInfo.recvData.Clear();
-                //分割粘在一起的帧
+                //去除所有帧中的重要数据
                 List<DataInfo> dataInfos = reciveAndAnalysis.GetDataInfoList(realData);
                 //获取遥测帧中的传感数据并发送给http服务器
-                Utils.AnalysisFrameToHttpServer(realData, urls);
+                //reciveAndAnalysis.SendToHttpServer(dataInfos, urls);
                 //更新FCB
                 if (macInfo.FCV == 1)
                 {
@@ -362,12 +365,6 @@ namespace CSS8_IEC_Server
                 //将接收到的消息放入内存
                 macInfo.message += recvStr;
                 macInfo.recvCount++;
-                //若接受10次消息则清空内存
-                if (macInfo.recvCount == 6)
-                {
-                    macInfo.message = "";
-                    macInfo.recvCount = 0;
-                }
                 //显示消息
                 if (index == currentSelectIndex)
                 {
@@ -375,7 +372,13 @@ namespace CSS8_IEC_Server
                         form.Recv_TextBox.Text = macInfo.message;
                     })));
                 }
-                Thread.Sleep(1000);
+                //若接受10次消息则清空内存
+                if (macInfo.recvCount == 6)
+                {
+                    macInfo.message = "";
+                    macInfo.recvCount = 0;
+                }
+                Thread.Sleep(500);
             }
             if (macInfo.isUserDisconnect || macInfo.isSocketError)
             {
@@ -388,11 +391,17 @@ namespace CSS8_IEC_Server
         /// </summary>
         /// <param name="macInfo"></param>
         /// <param name="form"></param>
-        public static void ReciveData(MacInfo macInfo, Server_Form form)
+        public static void CycleReciveData(MacInfo macInfo, ServerForm form)
         {
             while (!macInfo.isUserDisconnect)
             {
-                macInfo.recvData.AddRange(reciveAndAnalysis.ReciveFrame(macInfo.socket, form));
+                byte[] recvData = reciveAndAnalysis.ReciveFrame(macInfo.socket, form);
+                if (recvData == null)
+                {
+                    macInfo.isSocketError = true;
+                    break;
+                }
+                macInfo.recvData.AddRange(recvData);
             }
             if (!macInfo.isCycleSend)
             {

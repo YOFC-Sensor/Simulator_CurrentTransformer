@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8" ?>
 <Root>
 	<Client serverIPAddr="192.168.8.180" serverPort="10200">
 		<Mac name="MAC1" number="65535" i_data="12.13,13.14,14.15,15.16" v_data="10.23,11.29,10.45,12.34" />

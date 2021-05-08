@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="bin\Debug\netcoreapp3.1\SersorUrls.txt" />
+    <Content Include="bin\Debug\netcoreapp3.1\SensorUrls.xml" />
   </ItemGroup>
 	
   <ItemGroup>

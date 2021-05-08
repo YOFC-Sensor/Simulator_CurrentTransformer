@@ -1,7 +1,7 @@
 ﻿
 namespace CSS8_IEC_Client
 {
-    partial class Client_Form
+    partial class ClientForm
     {
         /// <summary>
         ///  Required designer variable.

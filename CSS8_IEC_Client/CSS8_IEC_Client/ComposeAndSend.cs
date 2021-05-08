@@ -48,6 +48,7 @@ namespace CSS8_IEC_Client
         /// <param name="frameList"></param>
         public void Send(Socket socket, List<byte[]> frameList)
         {
+            socket.Send(new byte[] { 0x00 });
             foreach (byte[] frame in frameList)
             {
                 socket.Send(frame);

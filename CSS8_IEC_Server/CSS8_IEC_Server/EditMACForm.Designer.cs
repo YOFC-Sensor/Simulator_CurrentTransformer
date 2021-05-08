@@ -1,7 +1,7 @@
 ﻿
 namespace CSS8_IEC_Server
 {
-    partial class Form2
+    partial class EditMACForm
     {
         /// <summary>
         /// Required designer variable.
@@ -69,7 +69,7 @@ namespace CSS8_IEC_Server
             this.Edit_MAC_Cancle_Button.Text = "取消";
             this.Edit_MAC_Cancle_Button.UseVisualStyleBackColor = true;
             // 
-            // Form2
+            // Edit_MAC_Form
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -78,8 +78,8 @@ namespace CSS8_IEC_Server
             this.Controls.Add(this.Edit_MAC_OK_Button);
             this.Controls.Add(this.Number_Label);
             this.Controls.Add(this.Number_TextBox);
-            this.Name = "Form2";
-            this.Text = "Form2";
+            this.Name = "Edit_MAC_Form";
+            this.Text = "修改设备";
             this.ResumeLayout(false);
             this.PerformLayout();
 

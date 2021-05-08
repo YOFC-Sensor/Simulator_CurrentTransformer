@@ -17,7 +17,7 @@ namespace CSS8_IEC_Client
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Client_Form());
+            Application.Run(new ClientForm());
         }
     }
 }

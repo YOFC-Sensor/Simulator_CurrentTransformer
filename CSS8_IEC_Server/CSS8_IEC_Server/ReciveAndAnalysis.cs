@@ -3,8 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading;
+using System.Xml;
 
 namespace CSS8_IEC_Server
 {
@@ -25,6 +24,19 @@ namespace CSS8_IEC_Server
     public class ReciveAndAnalysis
     {
         private FrameHandle frameHandle = new FrameHandle();
+
+        /// <summary>
+        /// 2字节转小数
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="accuracy"></param>
+        /// <returns></returns>
+        public double Byte2ToDouble(byte[] data, int accuracy)
+        {
+            double div = Math.Pow(10, accuracy);
+            double result = ((double)data[1] * 256 + (double)data[0]) / div;
+            return result;
+        }
 
         /// <summary>
         /// 获取帧类型
@@ -73,7 +85,7 @@ namespace CSS8_IEC_Server
         /// <param name="connectState"></param>
         /// <param name="form"></param>
         /// <returns></returns>
-        public byte[] ReciveFrame(Socket socket, Server_Form form)
+        public byte[] ReciveFrame(Socket socket, ServerForm form)
         {
             //接受客户端发送的信息
             byte[] recvBuffer = new byte[1024];
@@ -96,7 +108,6 @@ namespace CSS8_IEC_Server
             {
                 if (socket.Available <= 0)
                 {
-                    socket.Disconnect(true);
                     return null;
                 }
             }
@@ -131,6 +142,12 @@ namespace CSS8_IEC_Server
             return dataInfoList;
         }
 
+        /// <summary>
+        /// 获取JSON类型的数据
+        /// </summary>
+        /// <param name="number"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
         public List<Dictionary<string, double>> GetJsonDataList(int number, List<byte> data)
         {
             List<Dictionary<string, double>> jsonDataList = new List<Dictionary<string, double>>();
@@ -151,14 +168,46 @@ namespace CSS8_IEC_Server
                 int t = 0;
                 Dictionary<string, double> jsonData = new Dictionary<string, double>();
                 t = i;
-                jsonData.Add("sensor_" + number.ToString() + "_" + (i / 2).ToString() + "_A", Utils.Byte2ToDouble(data.Skip(t).Take(2).ToArray(), accuracy));
+                jsonData.Add("sensor_" + number.ToString() + "_" + (i / 2).ToString() + "_A", Byte2ToDouble(data.Skip(t).Take(2).ToArray(), accuracy));
                 t = i + data.Count / 2;
-                jsonData.Add("sensor_" + number.ToString() + "_" + (i / 2).ToString() + "_V", Utils.Byte2ToDouble(data.Skip(t).Take(2).ToArray(), accuracy));
+                jsonData.Add("sensor_" + number.ToString() + "_" + (i / 2).ToString() + "_V", Byte2ToDouble(data.Skip(t).Take(2).ToArray(), accuracy));
                 totalJsonData.Add(jsonData);
             }
             return jsonDataList;
         }
 
+        /// <summary>
+        /// 读取XML文件中的传感器URL
+        /// </summary>
+        /// <param name="xmlPath"></param>
+        /// <returns></returns>
+        public List<List<string>> GetTotalSensorUrls(string xmlPath)
+        {
+            List<List<string>> totalUrls = new List<List<string>>();
+            XmlDocument xmlDoc = new XmlDocument();
+            xmlDoc.Load(xmlPath);
+            XmlNode xmlServer = xmlDoc.SelectSingleNode("Server");
+            XmlNodeList xmlMacs = xmlServer.SelectNodes("Mac");
+            foreach (XmlNode xmlMac in xmlMacs)
+            {
+                List<string> sensorUrls = new List<string>();
+                XmlNodeList xmlSensors = xmlMac.SelectNodes("Sersor");
+                foreach (XmlNode xmlSensor in xmlSensors)
+                {
+                    XmlElement xe = (XmlElement)xmlSensor;
+                    string url = xe.GetAttribute("url");
+                    sensorUrls.Add(url);
+                }
+                totalUrls.Add(sensorUrls);
+            }
+            return totalUrls;
+        }
+
+        /// <summary>
+        /// 将Json类型的数据发送给http服务器
+        /// </summary>
+        /// <param name="dataInfos"></param>
+        /// <param name="urls"></param>
         public void SendToHttpServer(List<DataInfo> dataInfos, List<string> urls)
         {
             foreach (DataInfo dataInfo in dataInfos)

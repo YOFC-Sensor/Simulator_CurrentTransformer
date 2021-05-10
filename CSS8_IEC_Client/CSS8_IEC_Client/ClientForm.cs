@@ -104,7 +104,7 @@ namespace CSS8_IEC_Client
         /// </summary>
         public void AddMac()
         {
-            macInfoList = XmlTomacInfoList(xmlPath);
+            macInfoList = XmlToMacInfoList(xmlPath);
             //添加设备
             for (int i = 0; i < macInfoList.Count; i++)
             {
@@ -243,7 +243,7 @@ namespace CSS8_IEC_Client
         /// </summary>
         /// <param name="xmlPath"></param>
         /// <returns></returns>
-        public List<MacInfo> XmlTomacInfoList(string xmlPath)
+        public List<MacInfo> XmlToMacInfoList(string xmlPath)
         {
             List<MacInfo> macInfos = new List<MacInfo>();
             XmlDocument xmlDoc = new XmlDocument();

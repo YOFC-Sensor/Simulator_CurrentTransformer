@@ -16,7 +16,7 @@ namespace CSS8_IEC_Client
         public static ComposeAndSend composeAndSend = new ComposeAndSend();
         public static List<MacInfo> macInfoList = new List<MacInfo>();//用户已经添加的设备列表
         public static int currentSekectIndex = -1;//当前所选设备的下标
-        public static string xmlPath = @".\macInfoList.xml";//XML文件路径
+        public static string xmlPath = @".\Mac.xml";//XML文件路径
         public ClientForm()
         {
             InitializeComponent();

@@ -8,32 +8,32 @@ namespace CSS8_IEC_Client
     public class FrameHandle
     {
         /// <summary>
-        ///分割帧
+        /// 
         /// </summary>
         /// <param name="frame"></param>
         /// <returns></returns>
         public FrameInfo DivideFrame(byte[] frame)
         {
-            FrameInfo FrameInfo = new FrameInfo();
-            FrameInfo.header = frame[0];
-            switch (FrameInfo.header)
+            FrameInfo frameInfo = new FrameInfo();
+            frameInfo.header = frame[0];
+            switch (frameInfo.header)
             {
                 case 0x10:
-                    FrameInfo.ctrl = frame[1];
-                    FrameInfo.addr = new byte[] { frame[2], frame[3] };
-                    FrameInfo.cs = frame[4];
+                    frameInfo.ctrl = frame[1];
+                    frameInfo.addr = new byte[] { frame[2], frame[3] };
+                    frameInfo.cs = frame[4];
                     break;
                 case 0x68:
-                    FrameInfo.length = frame[1];
-                    FrameInfo.ctrl = frame[4];
-                    FrameInfo.addr = new byte[] { frame[5], frame[6] };
-                    FrameInfo.asdu = frame.Skip(7).Take(FrameInfo.length - 2 - 1).ToList();
-                    FrameInfo.cs = frame[frame.Length - 2];
+                    frameInfo.length = frame[1];
+                    frameInfo.ctrl = frame[4];
+                    frameInfo.addr = new byte[] { frame[5], frame[6] };
+                    frameInfo.asdu = frame.Skip(7).Take(frameInfo.length - 2 - 1).ToList();
+                    frameInfo.cs = frame[frame.Length - 2];
                     break;
                 default:
-                    return FrameInfo;
+                    return frameInfo;
             }
-            return FrameInfo;
+            return frameInfo;
         }
 
         /// <summary>
@@ -43,16 +43,16 @@ namespace CSS8_IEC_Client
         /// <returns></returns>
         public ASDUInfo DivideASDU(byte[] asdu)
         {
-            ASDUInfo ASDUInfo = new ASDUInfo();
-            ASDUInfo.type = asdu[0];
-            ASDUInfo.vsq = asdu[1];
-            ASDUInfo.cot = asdu[2];
-            ASDUInfo.addr = new byte[] { asdu[3], asdu[4] };
-            ASDUInfo.fun = asdu[5];
-            ASDUInfo.inf = asdu[6];
-            int dataLen = ASDUInfo.vsq & 0x7F;
-            ASDUInfo.data = asdu.Skip(7).Take(dataLen).ToList();
-            return ASDUInfo;
+            ASDUInfo asduInfo = new ASDUInfo();
+            asduInfo.type = asdu[0];
+            asduInfo.vsq = asdu[1];
+            asduInfo.cot = asdu[2];
+            asduInfo.addr = new byte[] { asdu[3], asdu[4] };
+            asduInfo.fun = asdu[5];
+            asduInfo.inf = asdu[6];
+            int dataLen = asduInfo.vsq & 0x7F;
+            asduInfo.data = asdu.Skip(7).Take(dataLen).ToList();
+            return asduInfo;
         }
 
         /// <summary>

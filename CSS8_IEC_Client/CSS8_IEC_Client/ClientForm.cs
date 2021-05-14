@@ -172,7 +172,7 @@ namespace CSS8_IEC_Client
             while (macInfo.isCanRecive)
             {
                 //接受服务器发送的信息
-                byte[] recvFrame = reciveAndAnalysis.ReciveFrame(macInfo.socket, form);
+                byte[] recvFrame = reciveAndAnalysis.ReciveFrame(macInfo.socket);
                 if (recvFrame == null)
                 {
                     form.Mac_ListView.EndInvoke(form.Mac_ListView.BeginInvoke(new Action(() => {

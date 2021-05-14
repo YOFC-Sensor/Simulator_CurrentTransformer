@@ -71,7 +71,7 @@ namespace CSS8_IEC_Client
         /// <param name="connectState"></param>
         /// <param name="form"></param>
         /// <returns></returns>
-        public byte[] ReciveFrame(Socket socket, ClientForm form)
+        public byte[] ReciveFrame(Socket socket)
         {
             //接受服务器发送的信息
             byte[] recvBuffer = new byte[1024];

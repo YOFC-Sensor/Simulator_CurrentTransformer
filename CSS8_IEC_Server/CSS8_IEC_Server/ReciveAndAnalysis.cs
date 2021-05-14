@@ -154,11 +154,11 @@ namespace CSS8_IEC_Server
             int accuracy = 0;
             if (data.Count > 33)
             {
-                accuracy = 2;
+                accuracy = 1;
             }
             else
             {
-                accuracy = 1;
+                accuracy = 2;
             }
             data.RemoveRange(0, 2);
             for (int i = 0; i < (data.Count / 2); i = i + 2)
@@ -167,7 +167,7 @@ namespace CSS8_IEC_Server
                 Dictionary<string, double> jsonData = new Dictionary<string, double>();
                 t = i;
                 jsonData.Add("sensor_" + number.ToString() + "_" + (i / 2).ToString() + "_A", Byte2ToDouble(data.Skip(t).Take(2).ToArray(), accuracy));
-                t = i + data.Count / 2;
+                t = i + 8;
                 jsonData.Add("sensor_" + number.ToString() + "_" + (i / 2).ToString() + "_V", Byte2ToDouble(data.Skip(t).Take(2).ToArray(), accuracy));
                 jsonDataList.Add(jsonData);
             }

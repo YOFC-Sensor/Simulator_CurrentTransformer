@@ -85,7 +85,7 @@ namespace CSS8_IEC_Server
         /// <param name="connectState"></param>
         /// <param name="form"></param>
         /// <returns></returns>
-        public byte[] ReciveFrame(Socket socket, ServerForm form)
+        public byte[] ReciveFrame(Socket socket)
         {
             //接受客户端发送的信息
             byte[] recvBuffer = new byte[1024];
@@ -161,8 +161,6 @@ namespace CSS8_IEC_Server
                 accuracy = 1;
             }
             data.RemoveRange(0, 2);
-            //将帧中的数据组装成字典
-            List<Dictionary<string, double>> totalJsonData = new List<Dictionary<string, double>>();
             for (int i = 0; i < (data.Count / 2); i = i + 2)
             {
                 int t = 0;
@@ -171,7 +169,7 @@ namespace CSS8_IEC_Server
                 jsonData.Add("sensor_" + number.ToString() + "_" + (i / 2).ToString() + "_A", Byte2ToDouble(data.Skip(t).Take(2).ToArray(), accuracy));
                 t = i + data.Count / 2;
                 jsonData.Add("sensor_" + number.ToString() + "_" + (i / 2).ToString() + "_V", Byte2ToDouble(data.Skip(t).Take(2).ToArray(), accuracy));
-                totalJsonData.Add(jsonData);
+                jsonDataList.Add(jsonData);
             }
             return jsonDataList;
         }

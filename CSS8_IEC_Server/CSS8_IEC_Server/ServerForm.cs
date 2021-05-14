@@ -395,7 +395,7 @@ namespace CSS8_IEC_Server
         {
             while (!macInfo.isUserDisconnect)
             {
-                byte[] recvData = reciveAndAnalysis.ReciveFrame(macInfo.socket, form);
+                byte[] recvData = reciveAndAnalysis.ReciveFrame(macInfo.socket);
                 if (recvData == null)
                 {
                     macInfo.isSocketError = true;

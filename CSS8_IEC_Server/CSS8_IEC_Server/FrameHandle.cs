@@ -22,7 +22,7 @@ namespace CSS8_IEC_Server
                 int length = frames[1];
                 int totalLength = length + 6;
                 byte[] frame = frames.Skip(0).Take(totalLength).ToArray();
-                frameList.Add(frames);
+                frameList.Add(frame);
                 List<byte> listFrames = frames.ToList();
                 listFrames.RemoveRange(0, totalLength);
                 frames = listFrames.ToArray();

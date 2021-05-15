@@ -194,7 +194,7 @@ namespace CSS8_IEC_Server
             //将客户端信息显示到客户端
             AddMacToListView(socket);
             //接受客户端的数据
-            Thread t = new Thread(() => CycleReciveData(macInfo, this));
+            Thread t = new Thread(() => CycleReciveData(macInfo));
             t.IsBackground = true;
             t.Start();
             //判断客户端是否在线
@@ -390,8 +390,7 @@ namespace CSS8_IEC_Server
         /// 循环接收数据
         /// </summary>
         /// <param name="macInfo"></param>
-        /// <param name="form"></param>
-        public static void CycleReciveData(MacInfo macInfo, ServerForm form)
+        public static void CycleReciveData(MacInfo macInfo)
         {
             while (!macInfo.isUserDisconnect)
             {

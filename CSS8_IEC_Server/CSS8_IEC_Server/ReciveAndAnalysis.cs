@@ -82,8 +82,6 @@ namespace CSS8_IEC_Server
         /// 获取接收到的帧
         /// </summary>
         /// <param name="socket"></param>
-        /// <param name="connectState"></param>
-        /// <param name="form"></param>
         /// <returns></returns>
         public byte[] ReciveFrame(Socket socket)
         {

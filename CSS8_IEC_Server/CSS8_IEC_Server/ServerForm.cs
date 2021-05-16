@@ -334,22 +334,6 @@ namespace CSS8_IEC_Server
                 byte[] realData = macInfo.recvData.ToArray();
                 //清除接收缓冲区
                 macInfo.recvData.Clear();
-                //去除所有帧中的重要数据
-                List<DataInfo> dataInfos = reciveAndAnalysis.GetDataInfoList(realData);
-                //获取遥测帧中的传感数据并发送给http服务器
-                reciveAndAnalysis.SendToHttpServer(dataInfos, urls);
-                //更新FCB
-                if (macInfo.FCV == 1)
-                {
-                    if (macInfo.FCB == 0)
-                    {
-                        macInfo.FCB = 1;
-                    }
-                    else
-                    {
-                        macInfo.FCB = 0;
-                    }
-                }
                 //拼接16进制字符串
                 string recvStr = "";
                 foreach (byte data in realData)
@@ -371,6 +355,22 @@ namespace CSS8_IEC_Server
                     form.Recv_TextBox.EndInvoke(form.Recv_TextBox.BeginInvoke(new Action(() => {
                         form.Recv_TextBox.Text = macInfo.message;
                     })));
+                }
+                //获取所有帧中的重要数据
+                List<DataInfo> dataInfos = reciveAndAnalysis.GetDataInfoList(realData);
+                //获取遥测帧中的传感数据并发送给http服务器
+                reciveAndAnalysis.SendToHttpServer(dataInfos, urls);
+                //更新FCB
+                if (macInfo.FCV == 1)
+                {
+                    if (macInfo.FCB == 0)
+                    {
+                        macInfo.FCB = 1;
+                    }
+                    else
+                    {
+                        macInfo.FCB = 0;
+                    }
                 }
                 //若接受10次消息则清空内存
                 if (macInfo.recvCount == 6)

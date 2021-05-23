@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Root>
+	<Client serverIPAddr="192.168.8.180" serverPort="10200">
+		<Mac name="MAC1" number="65535" i_data="12.13,13.14,14.15,15.16" v_data="10.23,11.29,10.45,12.34" />
+		<Mac name="MAC2" number="65534" i_data="12.23,11.14,15.11,14.34" v_data="13.11,14.12,15.12,13.11" />
+		<Mac name="MAC3" number="65533" i_data="12.13,13.14,14.15,15.16" v_data="10.23,11.29,10.45,12.34" />
+		<Mac name="MAC4" number="65532" i_data="12.23,11.14,15.11,14.34" v_data="13.11,14.12,15.12,13.11" />
+	</Client>
+</Root>

@@ -1,10 +1,27 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Server>
-	<Mac>
-		<Sersor url="http://172.20.10.2:8080" />
-		<Sersor url="http://172.20.10.2:8080" />
-		<Sersor url="http://172.20.10.2:8080" />
-		<Sersor url="http://172.20.10.2:8080" />
-		<Sersor url="http://172.20.10.3:8080/api/v1/CSS8_IEC104_4/telemetry" />
+	<Mac number="65535">
+		<Sersor url="http://192.168.8.198:8080/api/v1/2270080001/telemetry" />
+		<Sersor url="http://192.168.8.198:8080/api/v1/2270080001/telemetry" />
+		<Sersor url="http://192.168.8.198:8080/api/v1/2270080001/telemetry" />
+		<Sersor url="http://192.168.8.198:8080/api/v1/2270080001/telemetry" />
+	</Mac>
+	<Mac number="65534">
+		<Sersor url="http://192.168.8.198:8080/api/v1/2270080002/telemetry" />
+		<Sersor url="http://192.168.8.198:8080/api/v1/2270080002/telemetry" />
+		<Sersor url="http://192.168.8.198:8080/api/v1/2270080002/telemetry" />
+		<Sersor url="http://192.168.8.198:8080/api/v1/2270080002/telemetry" />
+	</Mac>
+	<Mac number="65533">
+		<Sersor url="http://192.168.8.198:8080/api/v1/2270080003/telemetry" />
+		<Sersor url="http://192.168.8.198:8080/api/v1/2270080003/telemetry" />
+		<Sersor url="http://192.168.8.198:8080/api/v1/2270080003/telemetry" />
+		<Sersor url="http://192.168.8.198:8080/api/v1/2270080003/telemetry" />
+	</Mac>
+	<Mac number="65532">
+		<Sersor url="http://192.168.8.198:8080/api/v1/2270080004/telemetry" />
+		<Sersor url="http://192.168.8.198:8080/api/v1/2270080004/telemetry" />
+		<Sersor url="http://192.168.8.198:8080/api/v1/2270080004/telemetry" />
+		<Sersor url="http://192.168.8.198:8080/api/v1/2270080004/telemetry" />
 	</Mac>
 </Server>

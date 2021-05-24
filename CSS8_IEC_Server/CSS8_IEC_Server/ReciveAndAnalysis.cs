@@ -164,9 +164,9 @@ namespace CSS8_IEC_Server
                 int t = 0;
                 Dictionary<string, double> jsonData = new Dictionary<string, double>();
                 t = i;
-                jsonData.Add("sensor_" + number.ToString() + "_" + (i / 2).ToString() + "_A", Byte2ToDouble(data.Skip(t).Take(2).ToArray(), accuracy));
+                jsonData.Add("sensor_" + number.ToString() + "_" + ((i + 2) / 2).ToString() + "_A", Byte2ToDouble(data.Skip(t).Take(2).ToArray(), accuracy));
                 t = i + 8;
-                jsonData.Add("sensor_" + number.ToString() + "_" + (i / 2).ToString() + "_V", Byte2ToDouble(data.Skip(t).Take(2).ToArray(), accuracy));
+                jsonData.Add("sensor_" + number.ToString() + "_" + ((i + 2) / 2).ToString() + "_V", Byte2ToDouble(data.Skip(t).Take(2).ToArray(), accuracy));
                 jsonDataList.Add(jsonData);
             }
             return jsonDataList;
@@ -177,24 +177,29 @@ namespace CSS8_IEC_Server
         /// </summary>
         /// <param name="xmlPath"></param>
         /// <returns></returns>
-        public List<List<string>> GetTotalSensorUrls(string xmlPath)
+        public Dictionary<string, List<string>> GetTotalSensorUrls(string xmlPath)
         {
-            List<List<string>> totalUrls = new List<List<string>>();
+            Dictionary<string, List<string>> totalUrls = new Dictionary<string, List<string>>();
             XmlDocument xmlDoc = new XmlDocument();
             xmlDoc.Load(xmlPath);
             XmlNode xmlServer = xmlDoc.SelectSingleNode("Server");
             XmlNodeList xmlMacs = xmlServer.SelectNodes("Mac");
             foreach (XmlNode xmlMac in xmlMacs)
             {
-                List<string> sensorUrls = new List<string>();
-                XmlNodeList xmlSensors = xmlMac.SelectNodes("Sersor");
-                foreach (XmlNode xmlSensor in xmlSensors)
+                XmlElement xM = (XmlElement)xmlMac;
+                string numberStr = xM.GetAttribute("number");
+                if (!totalUrls.ContainsKey(numberStr))
                 {
-                    XmlElement xe = (XmlElement)xmlSensor;
-                    string url = xe.GetAttribute("url");
-                    sensorUrls.Add(url);
+                    List<string> sensorUrls = new List<string>();
+                    XmlNodeList xmlSensors = xmlMac.SelectNodes("Sersor");
+                    foreach (XmlNode xmlSensor in xmlSensors)
+                    {
+                        XmlElement xS = (XmlElement)xmlSensor;
+                        string url = xS.GetAttribute("url");
+                        sensorUrls.Add(url);
+                    }
+                    totalUrls.Add(numberStr, sensorUrls);
                 }
-                totalUrls.Add(sensorUrls);
             }
             return totalUrls;
         }
@@ -217,6 +222,10 @@ namespace CSS8_IEC_Server
                     List<Dictionary<string, double>> jsonDataList = GetJsonDataList(number, dataInfo.data);
                     for (int i = 0; i < urls.Count; i++)
                     {
+                        if (i == jsonDataList.Count)
+                        {
+                            break;
+                        }
                         Dictionary<string, double> jsonData = jsonDataList[i];
                         HTTPTransmit.Send(urls[i], jsonData);
                     }

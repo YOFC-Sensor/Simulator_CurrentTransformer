@@ -15,7 +15,7 @@ namespace CSS8_IEC_Client
         public static ReciveAndAnalysis reciveAndAnalysis = new ReciveAndAnalysis();
         public static ComposeAndSend composeAndSend = new ComposeAndSend();
         public static List<MacInfo> macInfoList = new List<MacInfo>();//用户已经添加的设备列表
-        public static int currentSekectIndex = -1;//当前所选设备的下标
+        public static int currentSelectIndex = -1;//当前所选设备的下标
         public static string xmlPath = @".\Mac.xml";//XML文件路径
         public ClientForm()
         {
@@ -39,9 +39,9 @@ namespace CSS8_IEC_Client
          */
         public void Clear_Recv_Str_Button_Click(object sender, EventArgs e)
         {
-            if (currentSekectIndex != -1)
+            if (currentSelectIndex != -1)
             {
-                macInfoList[currentSekectIndex].recvData = "";
+                macInfoList[currentSelectIndex].recvData = "";
                 Recv_TextBox.EndInvoke(Recv_TextBox.BeginInvoke(new Action(() => {
                     Recv_TextBox.Text = "";
                 })));
@@ -58,8 +58,8 @@ namespace CSS8_IEC_Client
             if (((ListView)sender).SelectedItems.Count != 0)
             {
                 //若选择了设备则显示对应设备接收到的信息
-                currentSekectIndex = ((ListView)sender).SelectedItems[0].Index;
-                Recv_TextBox.Text = macInfoList[currentSekectIndex].recvData;
+                currentSelectIndex = ((ListView)sender).SelectedItems[0].Index;
+                Recv_TextBox.Text = macInfoList[currentSelectIndex].recvData;
             }
         }
 
@@ -166,7 +166,7 @@ namespace CSS8_IEC_Client
         /// </summary>
         /// <param name="macInfo"></param>
         /// <param name="form"></param>
-        public void CycleRecvAndSend(MacInfo macInfo, ClientForm form)
+        public static void CycleRecvAndSend(MacInfo macInfo, ClientForm form)
         {
             int index = macInfoList.IndexOf(macInfo);
             while (macInfo.isCanRecive)
@@ -184,15 +184,17 @@ namespace CSS8_IEC_Client
                 if (recvFrame.Length > 0)
                 {
                     //展示信息
-                    string recvStr = "";
                     foreach (byte b in recvFrame)
                     {
-                        recvStr += b.ToString("X");
+                        macInfo.recvData += b.ToString("X");
                     }
-                    recvStr += "\r\n";
-                    form.Recv_TextBox.EndInvoke(form.Recv_TextBox.BeginInvoke(new Action(() => {
-                        form.Recv_TextBox.Text += recvStr;
-                    })));
+                    macInfo.recvData += "\r\n";
+                    if (currentSelectIndex == index)
+                    {
+                        form.Recv_TextBox.EndInvoke(form.Recv_TextBox.BeginInvoke(new Action(() => {
+                            form.Recv_TextBox.Text += macInfo.recvData;
+                        })));
+                    }
                     //获取数据信息
                     DataInfo dataInfo = new DataInfo();
                     dataInfo = reciveAndAnalysis.GetDataInfo(recvFrame);

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -17,7 +18,7 @@ namespace CSS8_IEC_Server
         public static List<MacInfo> macInfoList = new List<MacInfo>();//设备列表
         public static int currentSelectIndex = -1;//当前选择的设备下标
         public static string xmlPath = @".\SensorUrls.xml";//XML文件路径
-        public static List<List<string>> totalSensorUrls = new List<List<string>>();//每个传感器数据对应的URL
+        public static Dictionary<string, List<string>> totalSensorUrls = new Dictionary<string, List<string>>();//每个传感器数据对应的URL
         public static Mutex mtu = new Mutex();//线程锁
         
         public ServerForm()
@@ -187,8 +188,9 @@ namespace CSS8_IEC_Server
             }
             //添加第一个设备到内存列表
             MacInfo macInfo = new MacInfo();
-            macInfo.number[0] = 0xFF;
-            macInfo.number[1] = 0xFF;
+            int currentCount = macInfoList.Count;
+            macInfo.number[0] = 0x00;
+            macInfo.number[1] = 0x00;
             macInfo.socket = socket;
             macInfoList.Add(macInfo);
             //将客户端信息显示到客户端
@@ -215,7 +217,7 @@ namespace CSS8_IEC_Server
             ListViewItem listViewItem = new ListViewItem();
             listViewItem.Text = "";
             listViewItem.SubItems.Add(((IPEndPoint)socket.RemoteEndPoint).ToString());
-            listViewItem.SubItems.Add((0xFFFF).ToString());
+            listViewItem.SubItems.Add("未配置");
             listViewItem.SubItems.Add("未启用");
             //异步修改ListView并且等待修改完成
             Mac_ListView.EndInvoke(Mac_ListView.BeginInvoke(new Action(() => {
@@ -270,7 +272,8 @@ namespace CSS8_IEC_Server
         /// <param name="macInfo"></param>
         public void EditMacInfo(MacInfo macInfo)
         {
-            Mac_ListView.SelectedItems[0].SubItems[2].Text = macInfo.number.ToString();
+            int numberInt = macInfo.number[0] * 256 + macInfo.number[1];
+            Mac_ListView.SelectedItems[0].SubItems[2].Text = numberInt.ToString();
         }
 
         /// <summary>
@@ -303,9 +306,37 @@ namespace CSS8_IEC_Server
         {
             //获取当前设备的下标
             int index = macInfoList.IndexOf(macInfo);
+            //判断是否配置了站号
+            string numberState = "";
+            form.Mac_ListView.EndInvoke(form.Mac_ListView.BeginInvoke(new Action(() => {
+                numberState = form.Mac_ListView.Items[index].SubItems[2].Text;
+            })));
+            if (numberState == "未配置")
+            {
+                MessageBox.Show("请先配置设备的站号！");
+                macInfo.isCycleSend = false;
+                form.Mac_ListView.EndInvoke(form.Mac_ListView.BeginInvoke(new Action(() => {
+                    form.Mac_ListView.SelectedItems[0].SubItems[3].Text = "未启用";
+                    form.Get_Data_Button.Text = "打开通道";
+                })));
+                
+                return;
+            }
             //获取全部的Url
             totalSensorUrls = reciveAndAnalysis.GetTotalSensorUrls(xmlPath);
-            List<string> urls = totalSensorUrls[index];
+            string numberStr = (macInfo.number[0] * 256 + macInfo.number[1]).ToString();
+            if (!totalSensorUrls.ContainsKey(numberStr))
+            {
+                MessageBox.Show("配置文件中无对应的站号！");
+                macInfo.isCycleSend = false;
+                macInfo.isCycleSend = false;
+                form.Mac_ListView.EndInvoke(form.Mac_ListView.BeginInvoke(new Action(() => {
+                    form.Mac_ListView.SelectedItems[0].SubItems[3].Text = "未启用";
+                    form.Get_Data_Button.Text = "打开通道";
+                })));
+                return;
+            }
+            List<string> urls = totalSensorUrls[numberStr];
             while (macInfo.isCycleSend)
             {
                 //发送总召唤帧
@@ -316,7 +347,7 @@ namespace CSS8_IEC_Server
                 do
                 {
                     tempDataLen = macInfo.recvData.Count;
-                    Thread.Sleep(500);
+                    Thread.Sleep(1000);
                 } while (tempDataLen != macInfo.recvData.Count);
                 if (macInfo.recvData.Count == 0)
                 {

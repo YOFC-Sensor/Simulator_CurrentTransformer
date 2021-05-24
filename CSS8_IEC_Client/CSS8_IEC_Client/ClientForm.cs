@@ -41,7 +41,7 @@ namespace CSS8_IEC_Client
         {
             if (currentSelectIndex != -1)
             {
-                macInfoList[currentSelectIndex].recvData = "";
+                macInfoList[currentSelectIndex].message = "";
                 Recv_TextBox.EndInvoke(Recv_TextBox.BeginInvoke(new Action(() => {
                     Recv_TextBox.Text = "";
                 })));
@@ -59,7 +59,7 @@ namespace CSS8_IEC_Client
             {
                 //若选择了设备则显示对应设备接收到的信息
                 currentSelectIndex = ((ListView)sender).SelectedItems[0].Index;
-                Recv_TextBox.Text = macInfoList[currentSelectIndex].recvData;
+                Recv_TextBox.Text = macInfoList[currentSelectIndex].message;
             }
         }
 
@@ -172,8 +172,8 @@ namespace CSS8_IEC_Client
             while (macInfo.isCanRecive)
             {
                 //接受服务器发送的信息
-                byte[] recvFrame = reciveAndAnalysis.ReciveFrame(macInfo.socket);
-                if (recvFrame == null)
+                macInfo.recvData = reciveAndAnalysis.ReciveFrame(macInfo.socket);
+                if (macInfo.recvData == null)
                 {
                     form.Mac_ListView.EndInvoke(form.Mac_ListView.BeginInvoke(new Action(() => {
                         form.Mac_ListView.Items[index].SubItems[3].Text = "未连接";
@@ -181,23 +181,22 @@ namespace CSS8_IEC_Client
                     break;
                 }
                 //若收到的消息不为空
-                if (recvFrame.Length > 0)
+                if (macInfo.recvData.Length > 0)
                 {
                     //展示信息
-                    foreach (byte b in recvFrame)
+                    foreach (byte b in macInfo.recvData)
                     {
-                        macInfo.recvData += b.ToString("X");
+                        macInfo.message += b.ToString("X");
                     }
-                    macInfo.recvData += "\r\n";
+                    macInfo.message += "\r\n";
                     if (currentSelectIndex == index)
                     {
                         form.Recv_TextBox.EndInvoke(form.Recv_TextBox.BeginInvoke(new Action(() => {
-                            form.Recv_TextBox.Text += macInfo.recvData;
+                            form.Recv_TextBox.Text = macInfo.message;
                         })));
                     }
                     //获取数据信息
-                    DataInfo dataInfo = new DataInfo();
-                    dataInfo = reciveAndAnalysis.GetDataInfo(recvFrame);
+                    DataInfo dataInfo = reciveAndAnalysis.GetDataInfo(macInfo.recvData);
                     //判断是否可以发送消息
                     if (composeAndSend.isCanSend(dataInfo, macInfo.number))
                     {

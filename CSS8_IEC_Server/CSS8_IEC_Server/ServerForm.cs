@@ -343,12 +343,13 @@ namespace CSS8_IEC_Server
                 macInfo.FCV = 1;
                 macInfo.socket.Send(frameHandle.CombineMasterCallFrame(macInfo.number, macInfo.FCB, macInfo.FCV));
                 //获取完整的消息
-                int tempDataLen = 0;
+                int tempCount = 0;
                 do
                 {
-                    tempDataLen = macInfo.recvData.Count;
-                    Thread.Sleep(1000);
-                } while (tempDataLen != macInfo.recvData.Count);
+                    tempCount = macInfo.recvData.Count;
+                    Thread.Sleep(500);
+                } while (tempCount != macInfo.recvData.Count);
+                //若没接受到消息则重发
                 if (macInfo.recvData.Count == 0)
                 {
                     macInfo.reSendCount++;
@@ -361,25 +362,18 @@ namespace CSS8_IEC_Server
                     }
                     continue;
                 }
-                macInfo.reSendCount = 0;
-                byte[] realData = macInfo.recvData.ToArray();
-                //清除接收缓冲区
-                macInfo.recvData.Clear();
+                macInfo.reSendCount = 0;              
                 //拼接16进制字符串
-                string recvStr = "";
-                foreach (byte data in realData)
+                foreach (byte data in macInfo.recvData)
                 {
                     string tempStr = data.ToString("X");
                     if (tempStr.Length < 2)
                     {
                         tempStr = "0" + tempStr;
                     }
-                    recvStr += tempStr;
+                    macInfo.message += tempStr;
                 }
-                recvStr += "\r\n";
-                //将接收到的消息放入内存
-                macInfo.message += recvStr;
-                macInfo.recvCount++;
+                macInfo.message += "\r\n";
                 //显示消息
                 if (index == currentSelectIndex)
                 {
@@ -388,7 +382,9 @@ namespace CSS8_IEC_Server
                     })));
                 }
                 //获取所有帧中的重要数据
-                List<DataInfo> dataInfos = reciveAndAnalysis.GetDataInfoList(realData);
+                List<DataInfo> dataInfos = reciveAndAnalysis.GetDataInfoList(macInfo.recvData.ToArray());
+                //清空缓冲区
+                macInfo.recvData.Clear();
                 //获取遥测帧中的传感数据并发送给http服务器
                 reciveAndAnalysis.SendToHttpServer(dataInfos, urls);
                 //更新FCB
@@ -403,13 +399,13 @@ namespace CSS8_IEC_Server
                         macInfo.FCB = 0;
                     }
                 }
-                //若接受10次消息则清空内存
+                //若接受6次消息则清空内存
+                macInfo.recvCount++;
                 if (macInfo.recvCount == 6)
                 {
                     macInfo.message = "";
                     macInfo.recvCount = 0;
                 }
-                Thread.Sleep(500);
             }
             if (macInfo.isUserDisconnect || macInfo.isSocketError)
             {

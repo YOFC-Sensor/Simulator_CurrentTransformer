@@ -246,7 +246,7 @@ namespace CSS8_IEC_Server
         public override bool Equals(object obj)
         {
             bool isEqual = false;
-            if (frameType == ((DataInfo)obj).frameType && asduType == ((DataInfo)obj).asduType)
+            if (frameType == ((DataInfo)obj).frameType && asduType == ((DataInfo)obj).asduType && macNumber[0] == ((DataInfo)obj).macNumber[0] && macNumber[1] == ((DataInfo)obj).macNumber[1])
             {
                 isEqual = true;
             }
@@ -255,7 +255,7 @@ namespace CSS8_IEC_Server
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(frameType, asduType, data, macNumber, fcb);
+            return HashCode.Combine(frameType, asduType, data, macNumber);
         }
     }
 }

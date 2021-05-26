@@ -341,7 +341,11 @@ namespace CSS8_IEC_Server
             {
                 //发送总召唤帧
                 macInfo.FCV = 1;
-                macInfo.socket.Send(frameHandle.CombineMasterCallFrame(macInfo.number, macInfo.FCB, macInfo.FCV));
+                DataInfo dataInfo = new DataInfo();
+                dataInfo.macNumber = macInfo.number;
+                dataInfo.fcb = macInfo.FCB;
+                dataInfo.fcv = macInfo.FCV;
+                composeAndSend.Send(macInfo.socket, composeAndSend.CombinedFrame(dataInfo));
                 //获取完整的消息
                 int tempCount = 0;
                 do

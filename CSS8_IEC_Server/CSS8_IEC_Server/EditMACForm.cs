@@ -8,9 +8,6 @@ namespace CSS8_IEC_Server
         private EditMac editMac;
         public static MacInfo currentSelectMacInfo = null;
 
-        /*
-         * 按钮点击事件
-         */
         public EditMACForm(EditMac form1Delegate)
         {
             editMac = form1Delegate;
@@ -22,6 +19,9 @@ namespace CSS8_IEC_Server
             Edit_MAC_Cancle_Button.Click += Edit_MAC_Cancle_Button_Click;
         }
 
+        /*
+         * 按钮点击事件
+         */
         public void Edit_MAC_OK_Button_Click(object sender, EventArgs e)
         {
             try

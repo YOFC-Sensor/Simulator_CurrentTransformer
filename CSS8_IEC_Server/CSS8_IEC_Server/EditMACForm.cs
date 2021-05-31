@@ -27,13 +27,13 @@ namespace CSS8_IEC_Server
             try
             {
                 int intNumber = int.Parse(Number_TextBox.Text);
+                currentSelectMacInfo.number = IntToByte2(intNumber);
             }
             catch (Exception ex)
             {
                 MessageBox.Show("设备站号格式不正确：" + ex.Message);
                 return;
             }
-            currentSelectMacInfo.number = IntToByte2(intNumber);
             editMac(currentSelectMacInfo);
             Close();
         }

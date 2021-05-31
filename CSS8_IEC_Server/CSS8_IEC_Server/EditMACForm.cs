@@ -24,19 +24,17 @@ namespace CSS8_IEC_Server
 
         public void Edit_MAC_OK_Button_Click(object sender, EventArgs e)
         {
-            MacInfo macInfo = new MacInfo();
-            macInfo = currentSelectMacInfo;
             try
             {
                 int intNumber = int.Parse(Number_TextBox.Text);
-                macInfo.number = IntToByte2(intNumber);
+                currentSelectMacInfo.number = IntToByte2(intNumber);
             }
             catch (Exception ex)
             {
                 MessageBox.Show("设备站号格式不正确：" + ex.Message);
                 return;
             }
-            editMac(macInfo);
+            editMac(currentSelectMacInfo);
             Close();
         }
 

@@ -53,21 +53,29 @@ namespace CSS8_IEC_Server
 
         public void Get_Data_Button_Click(object sender, EventArgs e)
         {
-            MacInfo macInfo = macInfoList[currentSelectIndex];
-            if (!macInfo.isCycleSend)
+            if (Mac_ListView.Items[currentSelectIndex].SubItems[2].Text == "未配置")
             {
-                macInfo.isCycleSend = true;
-                Thread t = new Thread(() => CycleSendAndRecv(macInfo, this));
-                t.IsBackground = true;
-                t.Start();
-                Mac_ListView.SelectedItems[0].SubItems[3].Text = "已启用";
-                ((Button)sender).Text = "关闭通道";
+                MessageBox.Show("请先配置设备的站号！");
             }
             else
             {
-                macInfo.isCycleSend = false;
-                Mac_ListView.SelectedItems[0].SubItems[3].Text = "未启用";
-                ((Button)sender).Text = "打开通道";
+                if (Mac_ListView.SelectedItems[0].SubItems[3].Text == "未启用")
+                {
+                    macInfoList[currentSelectIndex].isCycleSend = true;
+                    Thread t = new Thread(() => CycleSendAndRecv(macInfoList[currentSelectIndex], this));
+                    t.IsBackground = true;
+                    t.Start();
+                    Mac_ListView.SelectedItems[0].SubItems[3].Text = "已启用";
+                    ((Button)sender).Text = "关闭通道";
+                    Edit_Mac_Button.Enabled = false;
+                }
+                else
+                {
+                    macInfoList[currentSelectIndex].isCycleSend = false;
+                    Mac_ListView.SelectedItems[0].SubItems[3].Text = "未启用";
+                    ((Button)sender).Text = "打开通道";
+                    Edit_Mac_Button.Enabled = true;
+                }
             }
         }
 
@@ -79,15 +87,21 @@ namespace CSS8_IEC_Server
                 Recv_TextBox.Text = macInfoList[currentSelectIndex].message;
                 DisConnect_Button.Enabled = true;
                 Edit_Mac_Button.Enabled = true;
+                if (((ListView)sender).Items[currentSelectIndex].SubItems[3].Text == "未连接")
+                {
+                    Get_Data_Button.Text = "打开通道";
+                    Get_Data_Button.Enabled = false;
+                }
                 if (macInfoList[currentSelectIndex].isCycleSend)
                 {
                     Get_Data_Button.Text = "关闭通道";
+                    Edit_Mac_Button.Enabled = false;
                 }
                 else
                 {
                     Get_Data_Button.Text = "打开通道";
+                    Edit_Mac_Button.Enabled = true;
                 }
-                Get_Data_Button.Enabled = true;
             }
             else
             {
@@ -306,22 +320,6 @@ namespace CSS8_IEC_Server
         {
             //获取当前设备的下标
             int index = macInfoList.IndexOf(macInfo);
-            //判断是否配置了站号
-            string numberState = "";
-            form.Mac_ListView.EndInvoke(form.Mac_ListView.BeginInvoke(new Action(() => {
-                numberState = form.Mac_ListView.Items[index].SubItems[2].Text;
-            })));
-            if (numberState == "未配置")
-            {
-                MessageBox.Show("请先配置设备的站号！");
-                macInfo.isCycleSend = false;
-                form.Mac_ListView.EndInvoke(form.Mac_ListView.BeginInvoke(new Action(() => {
-                    form.Mac_ListView.SelectedItems[0].SubItems[3].Text = "未启用";
-                    form.Get_Data_Button.Text = "打开通道";
-                })));
-                
-                return;
-            }
             //获取全部的Url
             totalSensorUrls = reciveAndAnalysis.GetTotalSensorUrls(xmlPath);
             string numberStr = (macInfo.number[0] * 256 + macInfo.number[1]).ToString();
@@ -366,7 +364,7 @@ namespace CSS8_IEC_Server
                     }
                     continue;
                 }
-                macInfo.reSendCount = 0;              
+                macInfo.reSendCount = 0;
                 //拼接16进制字符串
                 foreach (byte data in macInfo.recvData)
                 {

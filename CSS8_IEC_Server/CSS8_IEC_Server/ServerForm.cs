@@ -81,26 +81,20 @@ namespace CSS8_IEC_Server
 
         public void Mac_ListView_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (((ListView)sender).SelectedItems.Count != 0)
+            if (Mac_ListView.SelectedItems.Count != 0)
             {
-                currentSelectIndex = ((ListView)sender).SelectedItems[0].Index;
+                currentSelectIndex = Mac_ListView.SelectedItems[0].Index;
                 Recv_TextBox.Text = macInfoList[currentSelectIndex].message;
                 DisConnect_Button.Enabled = true;
                 Edit_Mac_Button.Enabled = true;
-                if (((ListView)sender).Items[currentSelectIndex].SubItems[3].Text == "未连接")
+                Get_Data_Button.Enabled = true;
+                if (!macInfoList[currentSelectIndex].isCycleSend)
                 {
                     Get_Data_Button.Text = "打开通道";
-                    Get_Data_Button.Enabled = false;
-                }
-                if (macInfoList[currentSelectIndex].isCycleSend)
-                {
-                    Get_Data_Button.Text = "关闭通道";
-                    Edit_Mac_Button.Enabled = false;
                 }
                 else
                 {
-                    Get_Data_Button.Text = "打开通道";
-                    Edit_Mac_Button.Enabled = true;
+                    Get_Data_Button.Text = "关闭通道";
                 }
             }
             else
@@ -288,6 +282,7 @@ namespace CSS8_IEC_Server
         {
             int numberInt = macInfo.number[0] * 256 + macInfo.number[1];
             Mac_ListView.SelectedItems[0].SubItems[2].Text = numberInt.ToString();
+            Get_Data_Button.Enabled = true;
         }
 
         /// <summary>

@@ -246,7 +246,7 @@ namespace CSS8_IEC_Server
         public override bool Equals(object obj)
         {
             bool isEqual = false;
-            if (frameType == ((DataInfo)obj).frameType && asduType == ((DataInfo)obj).asduType && macNumber[0] == ((DataInfo)obj).macNumber[0] && macNumber[1] == ((DataInfo)obj).macNumber[1])
+            if (frameType == ((DataInfo)obj).frameType && asduType == ((DataInfo)obj).asduType)
             {
                 isEqual = true;
             }
